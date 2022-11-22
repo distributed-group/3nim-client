@@ -33,8 +33,9 @@ async def start_socket(websocket, path):
         await websocket.send(response)
         
 def connect():
-	server = Server('http://192.168.10.5:5001')
+	server_ip = '' #fill correct server ip here
 	my_ip = socket.gethostbyname(socket.gethostname())
+	server = Server(server_ip+':5001')
 	try:
 		response = server.want_to_play(my_ip)
 		print(response)
