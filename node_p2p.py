@@ -10,7 +10,7 @@ node = NimPeerNode(socket.gethostbyname(socket.gethostname()), 10001)
 
 def connect():
     #connect to json-rpc server
-    server_ip = '192.168.10.5' #fill correct server ip here
+    server_ip = '' #fill correct server ip here
     server = Server('http://' +server_ip+ ':5001')
     try:
         response = server.want_to_play(my_ip)
