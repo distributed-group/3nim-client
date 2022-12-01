@@ -1,6 +1,7 @@
 import os
 import terminedia as pr
 import pyfiglet as fig
+import time
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
