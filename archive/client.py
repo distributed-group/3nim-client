@@ -31,16 +31,18 @@ async def greet(message) -> Result:
 async def start_socket(websocket, path):
     if response := await async_dispatch(await websocket.recv()):
         await websocket.send(response)
-        
+
 def connect():
-	server_ip = '' #fill correct server ip here
+	server_ip = '192.168.10.5' #fill correct server ip here
 	my_ip = socket.gethostbyname(socket.gethostname())
-	server = Server(server_ip+':5001')
+	server = Server('http://' +server_ip+ ':5001')
 	try:
 		response = server.want_to_play(my_ip)
 		print(response)
 		if response['status'] != 'wait for players':
 			asyncio.get_event_loop().run_until_complete(start_game(response, my_ip))		
+			#start_game_task = asyncio.create_task(start_game(response, my_ip))
+			#await start_game_task
 		#start a websocket in port 5002 in own ip adress
 		start_server = websockets.serve(start_socket, my_ip, 5002)
 		asyncio.get_event_loop().run_until_complete(start_server)
