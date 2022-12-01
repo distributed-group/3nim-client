@@ -5,12 +5,12 @@ from jsonrpclib import Server
 from NimPeerNode import NimPeerNode
 
 my_ip = socket.gethostbyname(socket.gethostname())
-node = NimPeerNode(socket.gethostbyname(socket.gethostname()), 10001)
+node = NimPeerNode(my_ip), 10001)
 
 
 def connect():
     #connect to json-rpc server
-    server_ip = '192.168.10.5' #fill correct server ip here
+    server_ip = '' #fill correct server ip here
     server = Server('http://' +server_ip+ ':5001')
     try:
         response = server.want_to_play(my_ip)
@@ -34,9 +34,7 @@ def start_game(peer_ips):
     peer_ips['status'] = 'connecting'
     node.send_to_nodes(peer_ips)
 
-    time.sleep(20) #now hang out 20secs to see if there are messages passed between all nodes
-
-    node.stop()
+    #node.stop()
 
 if __name__ == '__main__':
     connect()
