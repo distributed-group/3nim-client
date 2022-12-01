@@ -5,7 +5,7 @@ from jsonrpclib import Server
 from NimPeerNode import NimPeerNode
 
 my_ip = socket.gethostbyname(socket.gethostname())
-node = NimPeerNode(my_ip), 10001)
+node = NimPeerNode(my_ip, 10001)
 
 def connect():
     #connect to json-rpc server
