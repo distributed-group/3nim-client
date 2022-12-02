@@ -9,12 +9,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 my_ip = socket.gethostbyname(socket.gethostname())
-node = NimPeerNode(my_ip, 10001)
+p2p_port = 10001
+service_port = '5001'
+node = NimPeerNode(my_ip, p2p_port)
 
 def connect():
     #connect to json-rpc server
     server_ip = os.getenv("SERVER_IP")
-    server = Server('http://' + server_ip + ':5001')
+    server = Server('http://' + server_ip + ':' + service_port)
     try:
         response = server.want_to_play(my_ip)
         print(response)
@@ -29,8 +31,8 @@ def start_game(peer_ips):
     second_peer_ip = peer_ips['player2']
 
     #connect with the other two nodes, 1 and 2
-    node.connect_with_node(first_peer_ip, 10001)
-    node.connect_with_node(second_peer_ip, 10001)
+    node.connect_with_node(first_peer_ip, p2p_port)
+    node.connect_with_node(second_peer_ip, p2p_port)
     time.sleep(2)
 
     #send the ip addresses to nodes 1 and 2 so they can reach each others

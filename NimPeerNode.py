@@ -4,6 +4,8 @@ from NimGame import NimGame
 import time
 import socket
 
+p2p_port = 10001
+
 class NimPeerNode (Node):
     def __init__(self, host, port, id=None, callback=None, max_connections=0):
         self.nimgame = None
@@ -30,11 +32,11 @@ class NimPeerNode (Node):
         conn_hosts = []
         for node in connected_nodes:
             conn_hosts.append(node.host)
-            #try to connect but don't connect if connection exists or if it is myself
-            if self.my_ip != first_peer_ip and first_peer_ip not in conn_hosts:
-                super(NimPeerNode, self).connect_with_node(first_peer_ip, 10001)
-            if self.my_ip != second_peer_ip and second_peer_ip not in conn_hosts:
-                super(NimPeerNode, self).connect_with_node(second_peer_ip, 10001)
+        #try to connect but don't connect if connection exists or if it is myself
+        if self.my_ip != first_peer_ip and first_peer_ip not in conn_hosts:
+            super(NimPeerNode, self).connect_with_node(first_peer_ip, p2p_port)
+        if self.my_ip != second_peer_ip and second_peer_ip not in conn_hosts:
+            super(NimPeerNode, self).connect_with_node(second_peer_ip, p2p_port)
 
     def node_message(self, connected_node, data):
         self.my_ip = socket.gethostbyname(socket.gethostname())
