@@ -13,9 +13,11 @@ p2p_port = 10001
 server_port = '5001'
 node = NimPeerNode(my_ip, p2p_port)
 
-# Connects this client to the server.
-# When the client receives 'ready to start' -message, it connects with two peers. 
-# Peer IP addresses are in the response message.
+""" 
+Connects this client to the server.
+When the client receives 'ready to start' -message, it connects with two peers. 
+Peer IP addresses are in the response message.
+"""
 def connect():
     #Connect to json-rpc server
     server_ip = os.getenv("SERVER_IP")
@@ -29,7 +31,9 @@ def connect():
     except:
         print('Error: ', sys.exc_info())
 
-# Connects this client to the peers.
+"""
+Connects this client to the peers.
+"""
 def start_game(peer_ips):
     first_peer_ip = peer_ips['player1']
     second_peer_ip = peer_ips['player2']

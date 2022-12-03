@@ -23,13 +23,6 @@ class NimGame ():
                         'players': [player1, player2, player3],
                         'winner': None,
                         'moves_count': 0}
-    
-    def show_end_game(self):
-        clear()
-        print(self.state['last_note'])
-        pr.print('_______PLAYER ' + self.state['winner'] + ' WINS!_________', color='green')
-        pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
-        pr.print('press ctrl + c to quit', color='white')
 
     def show_game(self):
         clear()
@@ -45,6 +38,13 @@ class NimGame ():
             else:
                 pr.print('O', color='red', end=' ')
         pr.print('', color='white')
+
+    def show_end_game(self):
+        clear()
+        print(self.state['last_note'])
+        pr.print('_______PLAYER ' + self.state['winner'] + ' WINS!_________', color='green')
+        pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
+        pr.print('press ctrl + c to quit', color='white')
 
     def turn_manager(self):
         if self.state['phase'] == 'ended':
@@ -73,13 +73,12 @@ class NimGame ():
         else:
             self.show_game()
         
-
     def pick_sticks(self, amount, player):
         for i in range(0, amount):
             if self.state['sticks'].pop(0) == 0:
                 self.state['lost'].append(player)
                 self.state['last_note'] = player + ' picked rotten apple!'
-                #when game ends
+                # When game ends
                 if len(self.state['sticks']) == 0 and len(self.state['lost']) == 2:
                     self.state['phase'] = 'ended'
                     for p in self.state['players']:
@@ -89,17 +88,17 @@ class NimGame ():
                 return
         self.state['last_note'] = self.my_ip + ' picked ' + str(amount)
 
-    #not yet used
+    def update_state(self, new_state):
+            if abs(new_state['moves_count'] < self.state['moves_count']):
+                # Don't update from older state
+                print('ERROR! Moves out of syncronization!')
+            else:
+                self.state = new_state
+
+    # Not yet used
     def get_state(self):
         return self.state
-
-    def update_state(self, new_state):
-        if abs(new_state['moves_count'] < self.state['moves_count']):
-            #don't update from older state
-            print('ERROR! Moves out of syncronization!')
-        else:
-            self.state = new_state
-    
+        
 #if __name__ == '__main__':
 #    nimgame = NimGame('1.1', '1.1', '2.2','3.3')
 #    clear()
