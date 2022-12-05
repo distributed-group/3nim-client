@@ -1,103 +1,86 @@
-import os
-import terminedia as pr
-import pyfiglet as fig
 import time
-
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
+import printer
 
 class NimGame ():
 
-    def __init__(self, my_ip, player1, player2, player3):
+    def __init__(self, my_ip, player1_ip, player2_ip, player3_ip):
         self.my_ip = my_ip
-        self.player1 = player1
-        self.player2 = player2
-        self.player3 = player3
-        self.state = {'sticks': [1,1,1,1,1,0,1,1,1,1,0],
-                        'last': None,
-                        'last_move': None,
-                        'last_note': 'Waiting first player to start',
-                        'next': player1,
-                        'phase': 'starting',
-                        'lost': [],
-                        'players': [player1, player2, player3],
-                        'winner': None,
-                        'moves_count': 0}
-
-    def show_game(self):
-        clear()
-        if self.state['phase'] == 'starting':
-            pr.print(fig.figlet_format('N I M Game', font='5lineoblique'), color='yellow')
-        pr.print('', color='white')
-        print(self.state['last_note'])
-        print('Next turn: ' + self.state['next'] + '\n')
-        print('STICKS:\n')
-        for stick in self.state['sticks']:
-            if stick == 1:
-                pr.print('|', color='blue', end=' ')
-            else:
-                pr.print('O', color='red', end=' ')
-        pr.print('', color='white')
-
-    def show_end_game(self):
-        clear()
-        print(self.state['last_note'])
-        pr.print('_______PLAYER ' + self.state['winner'] + ' WINS!_________', color='green')
-        pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
-        pr.print('press ctrl + c to quit', color='white')
+        self.player1 = player1_ip
+        self.player2 = player2_ip
+        self.player3 = player3_ip
+        self.state = {'sticks': [1,1,0,1,1,0],
+                      'players': [player1_ip, player2_ip, player3_ip],
+                      'phase': 'starting', # Possible values are: starting, playing, ended
+                      'announcement': printer.waiting(), # Possible values can be found in class printer
+                      'next': player1_ip, # This would be better if it showed player number instead of IP
+                      'winner': None,
+                      'lost': [],
+                      'moves_count': 0}
 
     def turn_manager(self):
-        if self.state['phase'] == 'ended':
-            self.show_end_game()
-        elif self.state['next'] == self.my_ip and self.my_ip not in self.state['lost']:
-            self.show_game()
-            self.state['phase'] = 'playing'
-            pr.print('', color='yellow')
-            print('_______It is your turn_______')
-            print('Do you want to pick one or two sticks?')
-            answer = int(input())
-            self.pick_sticks(answer, self.my_ip)
-            self.state['last'] = self.my_ip
-            self.state['last_move'] = answer
-            self.state['moves_count'] = self.state['moves_count'] + 1
-            self.state['next'] = self.state['players'][(self.state['moves_count']) % 3]
-            if self.state['phase'] == 'ended':
-                self.show_end_game()
+
+        if self.state['phase'] == 'starting':
+            printer.print_title()
+
+        printer.print_gamestate(self.state['announcement'], self.state['next'], self.state['sticks'])
+
+        if self.our_turn():
+            if not self.lost():
+                # It is this node's turn and we are still in the game
+                return self.make_move()
+            elif self.lost(): 
+                # It would be this node's turn, but we have lost the game
+                self.increment_turn_count()
                 return self.state
-            self.show_game()
+                
+        if self.state['phase'] == 'ended':
+            printer.print_results(self.state['announcement'], self.state['winner'])
+
+    def our_turn(self):
+        return self.state['next'] == self.my_ip
+
+    def lost(self):
+        return self.my_ip in self.state['lost']
+
+    def make_move(self):
+        self.state['phase'] = 'playing'
+        answer = printer.ask_for_move()
+        self.pick_sticks(answer, self.my_ip) # Here it would also be better to use player number instead of IP
+        # Check if the game has ended
+        if self.is_end():
+            printer.print_results(self.state['announcement'], self.state['winner'])
             return self.state
-        elif self.state['next'] == self.my_ip and self.my_ip in self.state['lost']:
-            self.state['moves_count'] = self.state['moves_count'] + 1
-            self.state['next'] = self.state['players'][(self.state['moves_count']) % 3]
-            return self.state
-        else:
-            self.show_game()
+        self.increment_turn_count()
+        printer.print_gamestate(self.state['announcement'], self.state['next'], self.state['sticks'])
+        return self.state
+
+    def increment_turn_count(self):
+        self.state['moves_count'] = self.state['moves_count'] + 1
+        self.state['next'] = self.state['players'][(self.state['moves_count']) % 3]
         
     def pick_sticks(self, amount, player):
         for i in range(0, amount):
             if self.state['sticks'].pop(0) == 0:
                 self.state['lost'].append(player)
-                self.state['last_note'] = player + ' picked rotten apple!'
-                # When game ends
-                if len(self.state['sticks']) == 0 and len(self.state['lost']) == 2:
-                    self.state['phase'] = 'ended'
-                    for p in self.state['players']:
-                        if p not in self.state['lost']:
-                            self.state['winner'] = p
-                            break
+                self.state['announcement'] = printer.rotten_apple(player)
                 return
-        self.state['last_note'] = self.my_ip + ' picked ' + str(amount)
+        self.state['announcement'] = printer.sticks(player, amount)
+
+    def is_end(self):
+        if len(self.state['sticks']) == 0 and len(self.state['lost']) == 2:
+            self.state['phase'] = 'ended'
+            for p in self.state['players']:
+                if p not in self.state['lost']:
+                    self.state['winner'] = p
+            return True
+        return False
 
     def update_state(self, new_state):
-            if abs(new_state['moves_count'] < self.state['moves_count']):
-                # Don't update from older state
-                print('ERROR! Moves out of syncronization!')
-            else:
-                self.state = new_state
-
-    # Not yet used
-    def get_state(self):
-        return self.state
+        if abs(new_state['moves_count'] < self.state['moves_count']):
+            # Don't update from older state
+            print('ERROR! Moves out of syncronization!')
+        else:
+            self.state = new_state
         
 #if __name__ == '__main__':
 #    nimgame = NimGame('1.1', '1.1', '2.2','3.3')

@@ -14,7 +14,7 @@ class NimPeerNode (Node):
         super(NimPeerNode, self).__init__(host, port, id, callback, max_connections)
 
     """
-    This function is invoked when another node send this node a message.
+    This function is invoked when another node sends this node a message.
     """
     def node_message(self, connected_node, data):
 
@@ -36,20 +36,12 @@ class NimPeerNode (Node):
 
     """ 
     The message is an initial connecting message.
-    Before statring the game, we need to try to connect to the peers if not yet connected.
+    Before statring the game, we try to connect to the two peers.
     """
     def status_connecting(self, data):
-        second_peer_ip = data['player2']
         first_peer_ip = data['player1']
-        self.connect_with_peers(first_peer_ip, second_peer_ip)
-        data['status'] = 'start game'
-        super(NimPeerNode, self).send_to_nodes(data)
-
-    """
-    Try to connect with two peers.
-    """
-    def connect_with_peers(self, first_peer_ip, second_peer_ip):
-        # Collect connected nodes IP addresses
+        second_peer_ip = data['player2']
+        # Collect IP addresses of nodes connected to this node
         connected_nodes = super(NimPeerNode, self).all_nodes
         conn_hosts = []
         for node in connected_nodes:
@@ -59,9 +51,11 @@ class NimPeerNode (Node):
             super(NimPeerNode, self).connect_with_node(first_peer_ip, p2p_port)
         if self.my_ip != second_peer_ip and second_peer_ip not in conn_hosts:
             super(NimPeerNode, self).connect_with_node(second_peer_ip, p2p_port)
+        data['status'] = 'start game'
+        super(NimPeerNode, self).send_to_nodes(data)
     
     """ 
-    The message indicates others are ready, start the game.
+    Let's start the game.
     """
     def status_start_game(self, data):
         self.nimgame = NimGame(self.my_ip, data['player1'], data['player2'], data['player3'])
