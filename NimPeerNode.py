@@ -36,36 +36,19 @@ class NimPeerNode (Node):
     def status_connecting(self, data):
         first_peer_ip = data['1']
         second_peer_ip = data['2']
-
-        # Collect IP addresses of nodes connected to this node
-        connected_nodes = super(NimPeerNode, self).all_nodes
-        conn_hosts = []
-        for node in connected_nodes:
-            conn_hosts.append(node.host)
-        # Don't connect if connection exists or is node itself
-        if self.my_ip != first_peer_ip and first_peer_ip not in conn_hosts:
-            super(NimPeerNode, self).connect_with_node(first_peer_ip, p2p_port)
-        if self.my_ip != second_peer_ip and second_peer_ip not in conn_hosts:
-            super(NimPeerNode, self).connect_with_node(second_peer_ip, p2p_port)
-        # Check if there still are duplicates (connection query done at the same time)
-        # Do cheking only if I we are player1, then both does not kill the same connection
-        # It is still necessary to create possible duplicates first to get the start game -messages sent!
         if self.my_ip == first_peer_ip:
-            # Update connections list
-            connected_nodes = super(NimPeerNode, self).all_nodes
-            nodes_seen = []
-            for node in connected_nodes:
-                if node.id in nodes_seen:
-                    # There is a double connection, so kill it!
-                    super(NimPeerNode, self).disconnect_with_node(node)
-                nodes_seen.append(node.id)
-        data['status'] = 'start game'
-        super(NimPeerNode, self).send_to_nodes(data)
+            super(NimPeerNode, self).connect_with_node(second_peer_ip, p2p_port)
+            data['status'] = 'start game'
+            super(NimPeerNode, self).send_to_nodes(data)
     
     """ 
     Let's start the game.
     """
     def status_start_game(self, data):
+        second_peer_ip = data['2']
+        if self.my_ip == second_peer_ip:
+            #inform node 1 that, 'start game' is received it can also start
+            super(NimPeerNode, self).send_to_nodes(data)
         my_number = self.get_player_number(data)
         self.nimgame = NimGame(self.my_ip, my_number, data['1'], data['2'], data['3'])
         self.handle_turn(data)
@@ -96,12 +79,15 @@ class NimPeerNode (Node):
             super(NimPeerNode, self).send_to_nodes(data)
 
     def outbound_node_connected(self, connected_node):
+        super(NimPeerNode, self).print_connections()
         print("outbound_node_connected: " + connected_node.id)
         
     def inbound_node_connected(self, connected_node):
+        super(NimPeerNode, self).print_connections()
         print("inbound_node_connected: " + connected_node.id)
 
     def inbound_node_disconnected(self, connected_node):
+        super(NimPeerNode, self).print_connections()
         #print("inbound_node_disconnected: " + connected_node.id)
         connected_nodes = super(NimPeerNode, self).all_nodes
         #if connected_node not in connected_nodes:
@@ -109,6 +95,7 @@ class NimPeerNode (Node):
             #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
 
     def outbound_node_disconnected(self, connected_node):
+        super(NimPeerNode, self).print_connections()
         #print("outbound_node_disconnected: " + connected_node.id)
         connected_nodes = super(NimPeerNode, self).all_nodes
         #if connected_node not in connected_nodes:
@@ -116,6 +103,7 @@ class NimPeerNode (Node):
             #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
         
     def node_disconnect_with_outbound_node(self, connected_node):
+        super(NimPeerNode, self).print_connections()
         print("node wants to disconnect with oher outbound node: " + connected_node.id)
         
     def node_request_to_stop(self):
