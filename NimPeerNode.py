@@ -66,10 +66,8 @@ class NimPeerNode (Node):
     Let's start the game.
     """
     def status_start_game(self, data):
-        print("Hellou :)")
         my_number = self.get_player_number(data)
-        print(my_number)
-        self.nimgame = NimGame(self.my_ip, my_number, data[1], data[2], data[3])
+        self.nimgame = NimGame(self.my_ip, my_number, data['1'], data['2'], data['3'])
         self.handle_turn(data)
 
     def get_player_number(self, data):
