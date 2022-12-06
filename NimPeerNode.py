@@ -23,15 +23,10 @@ class NimPeerNode (Node):
 
         if 'status' in data.keys():
             if data['status'] == 'connecting':
-
                 self.status_connecting(data)
-
             elif data['status'] == 'start game' and not self.nimgame:
-
                 self.status_start_game(data)
-
             elif data['status'] == 'move':
-
                 self.status_move(data)
 
     """ 
@@ -39,8 +34,8 @@ class NimPeerNode (Node):
     Before statring the game, we try to connect to the two peers.
     """
     def status_connecting(self, data):
-        first_peer_ip = data['player1']
-        second_peer_ip = data['player2']
+        first_peer_ip = data[1]
+        second_peer_ip = data[2]
         # Collect IP addresses of nodes connected to this node
         connected_nodes = super(NimPeerNode, self).all_nodes
         conn_hosts = []
@@ -58,8 +53,15 @@ class NimPeerNode (Node):
     Let's start the game.
     """
     def status_start_game(self, data):
-        self.nimgame = NimGame(self.my_ip, data['player1'], data['player2'], data['player3'])
+        my_number = self.get_player_number(data)
+        self.nimgame = NimGame(self.my_ip, my_number, data[1], data[2], data[3])
         self.handle_turn(data)
+
+    def get_player_number(self, data):
+        for number in data:
+            if (data[number] == self.my_ip):
+                return number
+        return 0
 
     """ 
     Someone has made a move, update the game state.

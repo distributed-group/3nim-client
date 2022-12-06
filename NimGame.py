@@ -3,11 +3,10 @@ import printer
 
 class NimGame ():
 
-    def __init__(self, my_ip, player1_ip, player2_ip, player3_ip):
+    def __init__(self, my_ip, player_number, player1_ip, player2_ip, player3_ip):
         self.my_ip = my_ip
-        self.player1 = player1_ip
-        self.player2 = player2_ip
-        self.player3 = player3_ip
+        self.my_number = player_number
+        print(self.my_number)
         self.state = {'sticks': [1,1,0,1,1,0],
                       'players': [player1_ip, player2_ip, player3_ip],
                       'phase': 'starting', # Possible values are: starting, playing, ended
