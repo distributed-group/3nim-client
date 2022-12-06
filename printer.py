@@ -7,7 +7,6 @@ def print_title():
     pr.print(fig.figlet_format('N I M Game', font='5lineoblique'), color='yellow')
 
 def print_gamestate(announcement, player_in_turn, gamequeue):
-    # clear()
     pr.print('', color='white')
     print(announcement)
     print('Next in turn: ' + player_in_turn + '\n')
@@ -20,15 +19,19 @@ def print_gamestate(announcement, player_in_turn, gamequeue):
     pr.print('', color='white')
 
 def ask_for_move():
-    # clear()
     pr.print('', color='yellow')
     print('_______It is your turn_______')
     print('Do you want to pick one or two sticks?')
-    answer = int(input())
+    answer = input()
+    return answer
+
+def ask_again():
+    pr.print('', color='yellow')
+    print('Please pick either one (1) or two (2) sticks.')
+    answer = input()
     return answer
 
 def print_results(announcement, winner):
-    # clear()
     print(announcement)
     pr.print('_______PLAYER ' + winner + ' WINS!_________', color='green')
     pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')

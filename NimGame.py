@@ -18,12 +18,9 @@ class NimGame ():
                       'moves_count': 0}
 
     def turn_manager(self):
-
         if self.state['phase'] == 'starting':
             printer.print_title()
-
         printer.print_gamestate(self.state['announcement'], self.state['next'], self.state['sticks'])
-
         if self.our_turn():
             if not self.lost():
                 # It is this node's turn and we are still in the game
@@ -32,7 +29,6 @@ class NimGame ():
                 # It would be this node's turn, but we have lost the game
                 self.increment_turn_count()
                 return self.state
-                
         if self.state['phase'] == 'ended':
             printer.print_results(self.state['announcement'], self.state['winner'])
 
@@ -44,8 +40,8 @@ class NimGame ():
 
     def make_move(self):
         self.state['phase'] = 'playing'
-        answer = printer.ask_for_move()
-        self.pick_sticks(answer, self.my_ip) # Here it would also be better to use player number instead of IP
+        moves = self.get_user_input()
+        self.pick_sticks(moves, self.my_ip) # Here it would also be better to use player number instead of IP
         # Check if the game has ended
         if self.is_end():
             printer.print_results(self.state['announcement'], self.state['winner'])
@@ -53,6 +49,15 @@ class NimGame ():
         self.increment_turn_count()
         printer.print_gamestate(self.state['announcement'], self.state['next'], self.state['sticks'])
         return self.state
+
+    def get_user_input(self):
+        answer = printer.ask_for_move()
+        while True:
+            if answer.isnumeric():
+                answer = int(answer)
+                if answer == 1 or answer == 2:
+                    return answer
+            answer = printer.ask_again()
 
     def increment_turn_count(self):
         self.state['moves_count'] = self.state['moves_count'] + 1
