@@ -18,7 +18,14 @@ def print_gamestate(announcement, player_in_turn, my_number, gamequeue):
             pr.print('O', color='red', end=' ')
     pr.print('', color='white')
     if my_number != player_in_turn:
-        print('Now in turn: Player ' + str(player_in_turn) + '\n')
+        print('\nNow in turn: Player ' + str(player_in_turn) + '\n')
+
+def print_results(announcement, winner):
+    pr.print('', color='white')
+    print(announcement + '\n')
+    pr.print('_______PLAYER ' + str(winner) + ' WINS!_________', color='green')
+    pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
+    pr.print('press ctrl + c to quit', color='white')
 
 def ask_for_move():
     pr.print('', color='yellow')
@@ -32,12 +39,6 @@ def ask_again():
     print('Please pick either one (1) or two (2) sticks.')
     answer = input()
     return answer
-
-def print_results(announcement, winner):
-    print(announcement)
-    pr.print('_______PLAYER ' + str(winner) + ' WINS!_________', color='green')
-    pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
-    pr.print('press ctrl + c to quit', color='white')
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
