@@ -9,7 +9,7 @@ class NimGame ():
         self.state = {'sticks': [1,1,0,1,1,0],
                       'players': [player1_ip, player2_ip, player3_ip],
                       'phase': 'starting', # Possible values are: starting, playing, ended
-                      'announcement': printer.waiting(), # Possible values can be found in class printer
+                      'announcement': printer.starting(), # Possible values can be found in class printer
                       'player_in_turn': 1, # Number of the player in turn
                       'winner': None,
                       'lost': [],
@@ -18,7 +18,7 @@ class NimGame ():
     def turn_manager(self):
         if self.state['phase'] == 'starting':
             printer.print_title(self.my_number)
-        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.state['sticks'])
+        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
         if self.our_turn():
             if not self.lost():
                 # It is this node's turn and we are still in the game
@@ -45,7 +45,7 @@ class NimGame ():
             printer.print_results(self.state['announcement'], self.state['winner'])
             return self.state
         self.increment_turn_count()
-        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.state['sticks'])
+        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
         return self.state
 
     def get_user_input(self):
@@ -68,7 +68,7 @@ class NimGame ():
                 self.state['lost'].append(player)
                 self.state['announcement'] = printer.rotten_apple(player)
                 return
-        self.state['announcement'] = printer.sticks(player, amount)
+        self.state['announcement'] = printer.sticks(player, self.my_number, amount)
 
     def is_end(self):
         if len(self.state['sticks']) == 0 and len(self.state['lost']) == 2:

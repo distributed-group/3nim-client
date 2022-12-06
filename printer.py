@@ -7,10 +7,11 @@ def print_title(player_number):
     pr.print(fig.figlet_format('N I M Game', font='5lineoblique'), color='yellow')
     print('You are player ' + str(player_number) + '.')
 
-def print_gamestate(announcement, player_in_turn, gamequeue):
+def print_gamestate(announcement, player_in_turn, my_number, gamequeue):
     pr.print('', color='white')
-    print(announcement)
-    print('Next in turn: Player ' + str(player_in_turn) + '\n')
+    print(announcement + '\n')
+    if my_number != player_in_turn:
+        print('Now in turn: Player ' + str(player_in_turn) + '\n')
     print('STICKS:\n')
     for stick in gamequeue:
         if stick == 1:
@@ -44,14 +45,22 @@ def clear():
 """
 Here are ready-made strings to be used as announcements.
 """
-# Might be a bit inconsistent to only have this for the first player. This could be displayed during other wait times as well.
-def waiting():
-    return 'Waiting for the first player to make a move.'
+def starting():
+    return 'Welcome to the game.'
 
-def sticks(player_number, amount):
+def sticks(player_number, my_number, amount):
     if amount == 1:
-        return 'Player ' + str(player_number) + ' picked 1 stick.'
-    return 'Player ' + str(player_number) + ' picked ' + str(amount) + ' sticks.'
+        subjective = 'Player ' + str(player_number)
+        if my_number == player_number:
+            subjective = 'You'
+        return subjective + ' picked 1 stick.\n'
+    subjective = 'Player ' + str(player_number)
+    if my_number == player_number:
+        subjective = 'You'
+    return subjective + ' picked ' + str(amount) + ' sticks.\n'
 
-def rotten_apple(player_number):
-    return 'Player ' + str(player_number) + ' picked a rotten apple!'
+def rotten_apple(player_number, my_number):
+    subjective = 'Player ' + str(player_number)
+    if my_number == player_number:
+        subjective = 'You'
+    return subjective + ' picked a rotten apple!\n'
