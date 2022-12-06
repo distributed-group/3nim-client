@@ -36,6 +36,9 @@ class NimPeerNode (Node):
     def status_connecting(self, data):
         first_peer_ip = data[1]
         second_peer_ip = data[2]
+
+        print("Hellou 3")
+
         # Collect IP addresses of nodes connected to this node
         connected_nodes = super(NimPeerNode, self).all_nodes
         conn_hosts = []
@@ -53,7 +56,9 @@ class NimPeerNode (Node):
     Let's start the game.
     """
     def status_start_game(self, data):
+        print("Hellou 5")
         my_number = self.get_player_number(data)
+        print("Hellou 6")
         self.nimgame = NimGame(self.my_ip, my_number, data[1], data[2], data[3])
         self.handle_turn(data)
 

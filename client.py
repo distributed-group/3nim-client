@@ -37,15 +37,20 @@ Connects this client to the peers.
 def start_game(peer_ips):
     first_peer_ip = peer_ips[1]
     second_peer_ip = peer_ips[2]
+    print("Hellou 1")
 
     #Connect with the other two nodes, 1 and 2
     node.connect_with_node(first_peer_ip, p2p_port)
     node.connect_with_node(second_peer_ip, p2p_port)
     time.sleep(2)
 
+    print("Hellou 2")
+
     #Shares the IP addresses to nodes 1 and 2 so they can reach each other
     peer_ips['status'] = 'connecting'
     node.send_to_nodes(peer_ips)
+
+    print("Hellou 4")
 
 if __name__ == '__main__':
     connect()
