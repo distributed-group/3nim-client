@@ -68,7 +68,7 @@ class NimGame ():
                 self.state['lost'].append(player)
                 self.state['announcement'] = printer.rotten_apple(player)
                 return
-        self.state['announcement'] = printer.sticks(player, self.my_number, amount)
+        self.state['announcement'] = printer.sticks(player, amount)
 
     def is_end(self):
         if len(self.state['sticks']) == 0 and len(self.state['lost']) == 2:

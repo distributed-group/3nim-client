@@ -48,19 +48,10 @@ Here are ready-made strings to be used as announcements.
 def starting():
     return 'Welcome to the game.'
 
-def sticks(player_number, my_number, amount):
+def sticks(player_number, amount):
     if amount == 1:
-        subjective = 'Player ' + str(player_number)
-        if my_number == player_number:
-            subjective = 'You'
-        return subjective + ' picked 1 stick.\n'
-    subjective = 'Player ' + str(player_number)
-    if my_number == player_number:
-        subjective = 'You'
-    return subjective + ' picked ' + str(amount) + ' sticks.\n'
+        return 'Player ' + str(player_number) + ' picked 1 stick.\n'
+    return 'Player ' + str(player_number) + ' picked ' + str(amount) + ' sticks.\n'
 
-def rotten_apple(player_number, my_number):
-    subjective = 'Player ' + str(player_number)
-    if my_number == player_number:
-        subjective = 'You'
-    return subjective + ' picked a rotten apple!\n'
+def rotten_apple(player_number):
+    return 'Player ' + str(player_number) + ' picked a rotten apple!\n'
