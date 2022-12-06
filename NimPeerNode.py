@@ -31,7 +31,7 @@ class NimPeerNode (Node):
 
     """ 
     The message is an initial connecting message.
-    Before statring the game, we try to connect to the two peers.
+    Before statring the game, we try to connect to the peer.
     """
     def status_connecting(self, data):
         first_peer_ip = data['1']
@@ -47,6 +47,18 @@ class NimPeerNode (Node):
             super(NimPeerNode, self).connect_with_node(first_peer_ip, p2p_port)
         if self.my_ip != second_peer_ip and second_peer_ip not in conn_hosts:
             super(NimPeerNode, self).connect_with_node(second_peer_ip, p2p_port)
+        # Check if there still are duplicates (connection query done at the same time)
+        # Do cheking only if I we are player1, then both does not kill the same connection
+        # It is still necessary to create possible duplicates first to get the start game -messages sent!
+        if self.my_ip == first_peer_ip:
+            # Update connections list
+            connected_nodes = super(NimPeerNode, self).all_nodes
+            nodes_seen = []
+            for node in connected_nodes:
+                if node.id in nodes_seen:
+                    # There is a double connection, so kill it!
+                    super(NimPeerNode, self).disconnect_with_node(node)
+                nodes_seen.append(node.id)
         data['status'] = 'start game'
         super(NimPeerNode, self).send_to_nodes(data)
     
@@ -92,12 +104,18 @@ class NimPeerNode (Node):
         print("inbound_node_connected: " + connected_node.id)
 
     def inbound_node_disconnected(self, connected_node):
-        print("inbound_node_disconnected: " + connected_node.id)
-        print('trying get connection back')
-        super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
+        #print("inbound_node_disconnected: " + connected_node.id)
+        connected_nodes = super(NimPeerNode, self).all_nodes
+        #if connected_node not in connected_nodes:
+            #print('trying get connection back')
+            #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
 
     def outbound_node_disconnected(self, connected_node):
-        print("outbound_node_disconnected: " + connected_node.id)
+        #print("outbound_node_disconnected: " + connected_node.id)
+        connected_nodes = super(NimPeerNode, self).all_nodes
+        #if connected_node not in connected_nodes:
+            #print('trying get connection back')
+            #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
         
     def node_disconnect_with_outbound_node(self, connected_node):
         print("node wants to disconnect with oher outbound node: " + connected_node.id)
