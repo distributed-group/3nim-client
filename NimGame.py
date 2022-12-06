@@ -53,10 +53,11 @@ class NimGame ():
     def get_user_input(self):
         answer = printer.ask_for_move()
         while True:
-            if answer.isnumeric():
-                answer = int(answer)
-                if answer == 1 or answer == 2:
-                    return answer
+            if len(answer) <= 2:
+                if answer.isnumeric():
+                    answer = int(answer)
+                    if answer == 1 or answer == 2:
+                        return answer
             answer = printer.ask_again()
 
     def increment_turn_count(self):
