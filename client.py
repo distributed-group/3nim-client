@@ -35,6 +35,9 @@ def connect():
 Connects this client to the peers.
 """
 def start_game(peer_ips):
+    print("Hellou 0")
+    print(peer_ips[1])
+    print(peer_ips[2])
     first_peer_ip = peer_ips[1]
     second_peer_ip = peer_ips[2]
     print("Hellou 1")
