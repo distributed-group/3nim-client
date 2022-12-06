@@ -10,8 +10,6 @@ def print_title(player_number):
 def print_gamestate(announcement, player_in_turn, my_number, gamequeue):
     pr.print('', color='white')
     print(announcement + '\n')
-    if my_number != player_in_turn:
-        print('Now in turn: Player ' + str(player_in_turn) + '\n')
     print('STICKS:\n')
     for stick in gamequeue:
         if stick == 1:
@@ -19,6 +17,8 @@ def print_gamestate(announcement, player_in_turn, my_number, gamequeue):
         else:
             pr.print('O', color='red', end=' ')
     pr.print('', color='white')
+    if my_number != player_in_turn:
+        print('Now in turn: Player ' + str(player_in_turn) + '\n')
 
 def ask_for_move():
     pr.print('', color='yellow')

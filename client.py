@@ -24,7 +24,7 @@ def connect():
     server = Server('http://' + server_ip + ':' + str(server_port))
     try:
         response = server.want_to_play(my_ip)
-        print(response)
+        print(response['status'])
         if response['status'] == 'ready to start':
             #This node was the third node in the queue and the game can start
             start_game(response)
