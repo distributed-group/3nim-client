@@ -5,21 +5,20 @@ class NimGame ():
 
     def __init__(self, my_ip, player_number, player1_ip, player2_ip, player3_ip):
         self.my_ip = my_ip
-        self.my_number = player_number
-        print(self.my_number)
+        self.my_number = int(player_number)
         self.state = {'sticks': [1,1,0,1,1,0],
                       'players': [player1_ip, player2_ip, player3_ip],
                       'phase': 'starting', # Possible values are: starting, playing, ended
                       'announcement': printer.waiting(), # Possible values can be found in class printer
-                      'next': player1_ip, # This would be better if it showed player number instead of IP
+                      'player_in_turn': 1, # Number of the player in turn
                       'winner': None,
                       'lost': [],
                       'moves_count': 0}
 
     def turn_manager(self):
         if self.state['phase'] == 'starting':
-            printer.print_title()
-        printer.print_gamestate(self.state['announcement'], self.state['next'], self.state['sticks'])
+            printer.print_title(self.my_number)
+        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.state['sticks'])
         if self.our_turn():
             if not self.lost():
                 # It is this node's turn and we are still in the game
@@ -32,21 +31,21 @@ class NimGame ():
             printer.print_results(self.state['announcement'], self.state['winner'])
 
     def our_turn(self):
-        return self.state['next'] == self.my_ip
+        return self.state['player_in_turn'] == self.my_number
 
     def lost(self):
-        return self.my_ip in self.state['lost']
+        return self.my_number in self.state['lost']
 
     def make_move(self):
         self.state['phase'] = 'playing'
         moves = self.get_user_input()
-        self.pick_sticks(moves, self.my_ip) # Here it would also be better to use player number instead of IP
+        self.pick_sticks(moves, self.my_number)
         # Check if the game has ended
         if self.is_end():
             printer.print_results(self.state['announcement'], self.state['winner'])
             return self.state
         self.increment_turn_count()
-        printer.print_gamestate(self.state['announcement'], self.state['next'], self.state['sticks'])
+        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.state['sticks'])
         return self.state
 
     def get_user_input(self):
@@ -61,7 +60,7 @@ class NimGame ():
 
     def increment_turn_count(self):
         self.state['moves_count'] = self.state['moves_count'] + 1
-        self.state['next'] = self.state['players'][(self.state['moves_count']) % 3]
+        self.state['player_in_turn'] = (self.state['moves_count'] % 3) + 1
         
     def pick_sticks(self, amount, player):
         for i in range(0, amount):
@@ -74,9 +73,9 @@ class NimGame ():
     def is_end(self):
         if len(self.state['sticks']) == 0 and len(self.state['lost']) == 2:
             self.state['phase'] = 'ended'
-            for p in self.state['players']:
-                if p not in self.state['lost']:
-                    self.state['winner'] = p
+            for player_number in range(1, 4):
+                if player_number not in self.state['lost']:
+                    self.state['winner'] = player_number
             return True
         return False
 

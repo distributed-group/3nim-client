@@ -2,14 +2,15 @@ import os
 import terminedia as pr
 import pyfiglet as fig
 
-def print_title():
+def print_title(player_number):
     clear()
     pr.print(fig.figlet_format('N I M Game', font='5lineoblique'), color='yellow')
+    print('You are player ' + str(player_number) + '.')
 
 def print_gamestate(announcement, player_in_turn, gamequeue):
     pr.print('', color='white')
     print(announcement)
-    print('Next in turn: ' + player_in_turn + '\n')
+    print('Next in turn: Player ' + str(player_in_turn) + '\n')
     print('STICKS:\n')
     for stick in gamequeue:
         if stick == 1:
@@ -33,7 +34,7 @@ def ask_again():
 
 def print_results(announcement, winner):
     print(announcement)
-    pr.print('_______PLAYER ' + winner + ' WINS!_________', color='green')
+    pr.print('_______PLAYER ' + str(winner) + ' WINS!_________', color='green')
     pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
     pr.print('press ctrl + c to quit', color='white')
 
@@ -47,10 +48,10 @@ Here are ready-made strings to be used as announcements.
 def waiting():
     return 'Waiting for the first player to make a move.'
 
-def sticks(player, amount):
+def sticks(player_number, amount):
     if amount == 1:
-        return player + ' picked 1 stick.'
-    return player + ' picked ' + str(amount) + ' sticks.'
+        return 'Player ' + str(player_number) + ' picked 1 stick.'
+    return 'Player ' + str(player_number) + ' picked ' + str(amount) + ' sticks.'
 
-def rotten_apple(player):
-    return player + ' picked a rotten apple!'
+def rotten_apple(player_number):
+    return 'Player ' + str(player_number) + ' picked a rotten apple!'
