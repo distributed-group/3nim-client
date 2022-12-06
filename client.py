@@ -25,7 +25,7 @@ def connect():
     try:
         response = server.want_to_play(my_ip)
         print(response['status'])
-        if response['status'] == 'waiting for players':
+        if response['status'] == 'Waiting for players...':
             while True:
                 time.sleep(5)
                 res = server.is_connecting_started(response['game_id'])
