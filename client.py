@@ -25,7 +25,16 @@ def connect():
     try:
         response = server.want_to_play(my_ip)
         print(response['status'])
-        if response['status'] == 'ready to start':
+        if response['status'] == 'waiting for players':
+            while True:
+                time.sleep(5)
+                res = server.is_connecting_started(response['game_id'])
+                print('.')
+                if res['connecting_started']:
+                    print('started to establish peer connections')
+                    # Here we could start countdown, if the game does not start, go back to queue
+                    break
+        elif response['status'] == 'ready to start':
             #This node was the third node in the queue and the game can start
             start_game(response)
     except:
