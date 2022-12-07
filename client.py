@@ -42,6 +42,7 @@ def connect():
 
 """
 Connects this client to the peers.
+This code is executed by node 3.
 """
 def start_game(peer_ips):
     first_peer_ip = peer_ips['1']

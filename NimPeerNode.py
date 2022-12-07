@@ -31,7 +31,8 @@ class NimPeerNode (Node):
 
     """ 
     The message is an initial connecting message.
-    Before statring the game, we try to connect to the peer.
+    We try to connect to the peers.
+    This code is executed by nodes 1 and 2. However, only node 1 acts.
     """
     def status_connecting(self, data):
         first_peer_ip = data['1']
@@ -49,10 +50,15 @@ class NimPeerNode (Node):
         if self.my_ip == second_peer_ip:
             #inform node 1 that, 'start game' is received it can also start
             super(NimPeerNode, self).send_to_nodes(data)
+        # Create the local game state
         my_number = self.get_player_number(data)
         self.nimgame = NimGame(self.my_ip, my_number, data['1'], data['2'], data['3'])
-        self.handle_turn(data)
+        # Decide on an action
+        self.action(data)
 
+    """
+    Find own player number from the start game message.
+    """
     def get_player_number(self, data):
         for number in data:
             if (data[number] == self.my_ip):
@@ -60,23 +66,39 @@ class NimPeerNode (Node):
         return 0
 
     """ 
-    Someone has made a move, update the game state.
+    Someone has made a move: Update the game state and decide on an action.
     """
     def status_move(self, data):
+        # Update local state based on the received message
         self.nimgame.update_state(data['state'])
         # Give some time for the game to update the state
         time.sleep(2)
-        self.handle_turn(data)
+        # Decide on an action
+        self.action(data)
 
     """
-    Handles one turn...?
+    Decides what to do after a message has been received.
+    If it is our turn, we show the current state, make a move, update our local state, show it to the user and broadcast the new state to others.
+    TODO: The user has x seconds to make a move. Countdown is displayed to the user.
+    If it is not our turn, we only show the current state.
+    TODO: Always after considering an action, whether we made a move or not, we need to set the timer.
     """
-    def handle_turn(self, data):
-        new_state = self.nimgame.turn_manager()
-        if new_state:
-            data['status'] = 'move'
-            data['state'] = new_state
-            super(NimPeerNode, self).send_to_nodes(data)
+    def action(self, data):
+        self.nimgame.display_game_state()
+        if self.nimgame.our_turn():
+            updated_state = self.nimgame.make_move()
+            if updated_state:
+                data['status'] = 'move'
+                data['state'] = updated_state
+                super(NimPeerNode, self).send_to_nodes(data)
+        # Timer needs to be set here
+        self.set_timer()
+    
+    """
+    Sets an alarm that goes off in x seconds. Calling this function resets the alarm. Action is taken, if the alarm goes off.
+    """
+    def set_timer(self):
+        kakka_ajastin = ""
 
     def outbound_node_connected(self, connected_node):
         super(NimPeerNode, self).print_connections()

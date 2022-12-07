@@ -15,38 +15,37 @@ class NimGame ():
                       'lost': [],
                       'moves_count': 0}
 
-    def turn_manager(self):
+    def make_move(self):
+        if self.lost():
+            # We have already lost the game
+            self.increment_turn_count()
+        else:
+            # We make a move
+            self.state['phase'] = 'playing'
+            moves = self.get_user_input()
+            self.pick_sticks(moves, self.my_number)
+            # Check if the game has ended
+            if self.is_end():
+                printer.print_results(self.state['announcement'], self.state['winner'])
+                return self.state
+            self.increment_turn_count()
+            printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
+            return self.state
+
+    def display_game_state(self):
         if self.state['phase'] == 'starting':
             printer.print_title(self.my_number)
-        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
-        if self.our_turn():
-            if not self.lost():
-                # It is this node's turn and we are still in the game
-                return self.make_move()
-            elif self.lost(): 
-                # It would be this node's turn, but we have lost the game
-                self.increment_turn_count()
-                return self.state
-        if self.state['phase'] == 'ended':
+            printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
+        elif self.state['phase'] == 'ended':
             printer.print_results(self.state['announcement'], self.state['winner'])
+        else: 
+            printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
 
     def our_turn(self):
         return self.state['player_in_turn'] == self.my_number
 
     def lost(self):
         return self.my_number in self.state['lost']
-
-    def make_move(self):
-        self.state['phase'] = 'playing'
-        moves = self.get_user_input()
-        self.pick_sticks(moves, self.my_number)
-        # Check if the game has ended
-        if self.is_end():
-            printer.print_results(self.state['announcement'], self.state['winner'])
-            return self.state
-        self.increment_turn_count()
-        printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
-        return self.state
 
     def get_user_input(self):
         answer = printer.ask_for_move()
