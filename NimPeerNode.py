@@ -6,13 +6,15 @@ import threading
 import socket
 
 p2p_port = 10001
+DISCONNECT_TIMEOUT = 20.0
 
 class NimPeerNode (Node):
 
     def __init__(self, host, port, id=None, callback=None, max_connections=0):
         self.nimgame = None
         self.myip = host
-        self.timer = threading.Timer(5.0, self.alarm)
+        self.timer = threading.Timer(DISCONNECT_TIMEOUT, self.alarm)
+        self.last_setup = 0
         super(NimPeerNode, self).__init__(host, port, id, callback, max_connections)
 
     """
@@ -27,23 +29,33 @@ class NimPeerNode (Node):
             # Delete the previous timer and turn it off. Create a new timer.
             if self.timer.is_alive:
                 self.timer.cancel()
-                self.timer = threading.Timer(5.0, self.alarm)
+                self.timer = threading.Timer(DISCONNECT_TIMEOUT, self.alarm)
             if data['status'] == 'connecting':
                 self.status_connecting(data)
             elif data['status'] == 'start game' and not self.nimgame:
                 self.status_start_game(data)
                 # Reset timer
+                self.last_setup = time.time()
                 self.timer.start()
             elif data['status'] == 'move':
                 self.status_move(data)
                 # Reset timer
+                self.last_setup = time.time()
                 self.timer.start()
 
     """
     This function is executed if the alarm goes off.
     """
     def alarm(self):
-        print("Alarm!")
+        # For now this is the only thing we do:
+        # Add the current player to lost
+        disconnected_player = self.nimgame.state['player_in_turn']
+        if disconnected_player not in self.nimgame.state['lost']:
+            self.nimgame.state['lost'].append(disconnected_player)
+        # Print announcement about this to the remaining players
+        print("Player " + str(disconnected_player) + " has left the game.")
+        print("The alarm went off in " + str(time.time() - self.last_setup) + " seconds.")
+        # TODO: If two players still in the game, message whose turn is next. If only one player, declare winner and end game.
 
     """ 
     The message is an initial connecting message.
