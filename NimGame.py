@@ -30,7 +30,7 @@ class NimGame ():
                 return self.state
             self.increment_turn_count()
             printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
-            return self.state
+        return self.state
 
     def display_game_state(self):
         if self.state['phase'] == 'starting':
