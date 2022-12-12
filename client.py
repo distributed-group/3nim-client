@@ -72,7 +72,6 @@ def connect():
             start_game(response)
             print('game_id when checking connection', response['game_id'])
             connecter = check_connection(response, server, timer)
-            print('3node game id', response['game_id'])
     except:
         print('Error: ', sys.exc_info())
 
@@ -84,25 +83,30 @@ def alarm():
     timer_running = False
     print('Failed to connect with peers. Going back to queue, waiting for new players to play with.')
     print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
-    while len(node.nodes_outbound + node.nodes_inbound) > 0:
-        for n in (node.nodes_outbound + node.nodes_inbound):
-            print('disconnect with ', n)
-            node.disconnect_with_node(n.stop())
-        time.sleep(5)
+    disconnect_from_nodes()
     connect()
 
+"""
+This is calld when third nodes timer runs out of time
+"""
 def alarm_node3():
     global timer_running
     timer_running = False
     print('Failed to connect with peers.')
+    disconnect_from_nodes()
+    print('Shutting down node.')
+    node.stop()
+
+"""
+Disconnect the node from all it's peers
+"""
+def disconnect_from_nodes():
     print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
     while len(node.nodes_outbound + node.nodes_inbound) > 0:
         for n in (node.nodes_outbound + node.nodes_inbound):
             print('disconnect with ', n)
             node.disconnect_with_node(n.stop())
         time.sleep(5)
-    print('Shutting down node.')
-    node.stop()
 
 
 
