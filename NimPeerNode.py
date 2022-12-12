@@ -20,7 +20,6 @@ class NimPeerNode (Node):
         self.nimgame = None
         self.myip = host
         self.timer = threading.Timer(TURN_TIMEOUT, self.alarm)
-        self.last_setup = 0
         super(NimPeerNode, self).__init__(host, port, id, callback, max_connections)
 
     """
@@ -33,7 +32,7 @@ class NimPeerNode (Node):
 
         if 'status' in data.keys():
             # Delete the previous timer and turn it off. Create a new timer.
-            if self.timer.is_alive:
+            if self.timer.is_alive():
                 self.timer.cancel()
                 self.timer = threading.Timer(TURN_TIMEOUT, self.alarm)
             if data['status'] == 'connecting':
@@ -42,12 +41,10 @@ class NimPeerNode (Node):
                 self.status_start_game(data)
                 if not self.timer.is_alive():
                     # Set the timer
-                    self.last_setup = time.time()
                     self.timer.start()
             elif data['status'] == 'move':
                 self.status_move(data)
                 # Reset timer
-                self.last_setup = time.time()
                 self.timer.start()
             elif data['status'] == 'peer_disconnect':
                 self.nimgame.update_state(data['state'])
@@ -64,7 +61,6 @@ class NimPeerNode (Node):
             self.nimgame.state['lost'].append(disconnected_player)
         # Print announcement about this to the player
         print("Player " + str(disconnected_player) + " has disconnected.")
-        print("The alarm went off in " + str(time.time() - self.last_setup) + " seconds.")
 
         if len(self.nimgame.state['lost']) >= 2: #Peer disconnecting has ended the game, since one player had already lost before that
             # We update our own state
