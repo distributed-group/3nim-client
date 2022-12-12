@@ -42,7 +42,8 @@ class NimPeerNode (Node):
                 self.status_start_game(data)
                 # Reset timer
                 self.last_setup = time.time()
-                self.timer.start()
+                if not self.timer.is_alive:
+                    self.timer.start()
             elif data['status'] == 'move':
                 self.status_move(data)
                 # Reset timer
@@ -82,16 +83,18 @@ class NimPeerNode (Node):
     def status_start_game(self, data):
         # Let's inform the server we are connected to two if so
         if len(super(NimPeerNode, self).all_nodes) >= 2:
+            print('informing server about two peers')
             self.we_are_connected(data)
         second_peer_ip = data['2']
         if self.my_ip == second_peer_ip:
             #inform node 1 that, 'start game' is received it can also start
             super(NimPeerNode, self).send_to_nodes(data)
         # Create the local game state
-        my_number = self.get_player_number(data)
-        self.nimgame = NimGame(self.my_ip, my_number, data['1'], data['2'], data['3'])
-        # Decide on an action
-        self.action(data)
+        if not self.nimgame:
+            my_number = self.get_player_number(data)
+            self.nimgame = NimGame(self.my_ip, my_number, data['1'], data['2'], data['3'])
+            # Decide on an action
+            self.action(data)
 
     def we_are_connected(self, data):
         #Connect to json-rpc server

@@ -33,8 +33,6 @@ my_ip = socket.gethostbyname(socket.gethostname())
 p2p_port = 10001
 server_port = 5001
 node = NimPeerNode(my_ip, p2p_port)
-attempt = 0
-attempt_is_connected = 0
 connecter = None
 timer_running = False
 
@@ -44,8 +42,7 @@ When the client receives 'ready to start' -message, it connects with two peers.
 Peer IP addresses are in the response message.
 """
 def connect():
-    global attempt, attempt_is_connected, connecter, timer_running
-    attempt = attempt + 1
+    global connecter, timer_running
     #Connect to json-rpc server
     server_ip = os.getenv("SERVER_IP")
     server = Server('http://' + server_ip + ':' + str(server_port))
@@ -69,7 +66,7 @@ def connect():
             connecter = check_connection(response, server, timer)
         elif response['status'] == 'ready to start':
             #This node was the third node in the queue and the game can start
-            timer = threading.Timer(DISCONNECT_TIMEOUT, alarm)
+            timer = threading.Timer(DISCONNECT_TIMEOUT, alarm_node3)
             timer.start()
             timer_running = True
             start_game(response)
@@ -93,6 +90,20 @@ def alarm():
             node.disconnect_with_node(n.stop())
         time.sleep(5)
     connect()
+
+def alarm_node3():
+    global timer_running
+    timer_running = False
+    print('Failed to connect with peers.')
+    print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
+    while len(node.nodes_outbound + node.nodes_inbound) > 0:
+        for n in (node.nodes_outbound + node.nodes_inbound):
+            print('disconnect with ', n)
+            node.disconnect_with_node(n.stop())
+        time.sleep(5)
+    print('Shutting down node.')
+    node.stop()
+
 
 
 """
