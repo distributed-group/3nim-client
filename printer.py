@@ -27,6 +27,13 @@ def print_results(announcement, winner):
     pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
     pr.print('press ctrl + c to quit', color='white')
 
+def print_results_no_winner(announcement):
+    pr.print('', color='white')
+    print(announcement + '\n')
+    pr.print('_______PLEASE QUEUE AGAIN!_________', color='green')
+    pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
+    pr.print('press ctrl + c to quit', color='white')
+
 def ask_for_move():
     pr.print('', color='yellow')
     print('_______It is your turn_______')

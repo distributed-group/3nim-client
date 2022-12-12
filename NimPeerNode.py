@@ -40,9 +40,9 @@ class NimPeerNode (Node):
                 self.status_connecting(data)
             elif data['status'] == 'start game' and not self.nimgame:
                 self.status_start_game(data)
-                # Reset timer
-                self.last_setup = time.time()
-                if not self.timer.is_alive:
+                if not self.timer.is_alive():
+                    # Set the timer
+                    self.last_setup = time.time()
                     self.timer.start()
             elif data['status'] == 'move':
                 self.status_move(data)
@@ -54,7 +54,7 @@ class NimPeerNode (Node):
                 self.nimgame.display_game_state()
 
     """
-    This function is executed if the alarm goes off.
+    This function is executed when the alarm goes off.
     """
     def alarm(self):
         # For now this is the only thing we do:
@@ -62,29 +62,30 @@ class NimPeerNode (Node):
         disconnected_player = self.nimgame.state['player_in_turn']
         if disconnected_player not in self.nimgame.state['lost']:
             self.nimgame.state['lost'].append(disconnected_player)
-        # Print announcement about this to the remaining players
-        print("Player " + str(disconnected_player) + " has left the game.")
+        # Print announcement about this to the player
+        print("Player " + str(disconnected_player) + " has disconnected.")
         print("The alarm went off in " + str(time.time() - self.last_setup) + " seconds.")
-        #Peer disconnecting has ended the game, since one player had already lost before that
-        if len(self.nimgame.state['lost']) >= 2:
+
+        if len(self.nimgame.state['lost']) >= 2: #Peer disconnecting has ended the game, since one player had already lost before that
             # We update our own state
             self.nimgame.update_winner()
             self.nimgame.state['announcement'] = "Player " + str(disconnected_player) + " has disconnected and player " + str(self.nimgame.state['winner']) + " has won!"
-            # Let the other node as well
-            super(NimPeerNode, self).send_to_nodes(self.create_message())
-            #Show the end screen to player
-            self.nimgame.display_game_state()
         else:
-            # TODO: Two players are still in the game, let's continue
-            pass
+            # We update our own state
+            self.nimgame.state['announcement'] = "Player " + str(disconnected_player) + " has left the game.\nThe game has ended."
+            self.nimgame.state['phase'] = 'ended_no_winner'
+        # Let the other node know as well
+        super(NimPeerNode, self).send_to_nodes(self.create_message('peer_disconnect'))
+        #Show the end screen to player
+        self.nimgame.display_game_state()
     
-    def create_message(self):
+    def create_message(self, status):
         game = self.nimgame
         data = {}
         data['1'] = game.state['players'][0]
         data['2'] = game.state['players'][1]
         data['3'] = game.state['players'][2]
-        data['status'] = 'peer_disconnect'
+        data['status'] = status
         data['state'] = self.nimgame.state
         return data
 

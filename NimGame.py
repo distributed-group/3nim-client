@@ -34,6 +34,8 @@ class NimGame ():
             printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
         elif self.state['phase'] == 'ended':
             printer.print_results(self.state['announcement'], self.state['winner'])
+        elif self.state['phase'] == 'ended_no_winner':
+            printer.print_results_no_winner(self.state['announcement'])
         else: 
             printer.print_gamestate(self.state['announcement'], self.state['player_in_turn'], self.my_number, self.state['sticks'])
 
@@ -55,6 +57,9 @@ class NimGame ():
 
     def increment_turn_count(self):
         self.state['turn_count'] = self.state['turn_count'] + 1
+        self.update_player_in_turn()
+
+    def update_player_in_turn(self):
         next_player = (self.state['player_in_turn'] % 3) + 1
         while next_player in self.state['lost']:
             next_player = (next_player % 3) + 1
