@@ -63,3 +63,9 @@ def sticks(player_number, amount):
 
 def rotten_apple(player_number):
     return 'Player ' + str(player_number) + ' picked a rotten apple!\n'
+
+def disconnect_and_winner(disconnected_player, winner):
+    return "Player " + str(disconnected_player) + " has disconnected and player " + str(winner) + " has won!"
+
+def disconnect(disconnected_player):
+    return "Player " + str(disconnected_player) + " has left the game.\nThe game has ended."
