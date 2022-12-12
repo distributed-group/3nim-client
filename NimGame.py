@@ -71,12 +71,15 @@ class NimGame ():
 
     def is_end(self):
         if len(self.state['sticks']) == 0 and len(self.state['lost']) >= 2:
-            self.state['phase'] = 'ended'
-            for player_number in range(1, 4):
-                if player_number not in self.state['lost']:
-                    self.state['winner'] = player_number
+            self.update_winner()
             return True
         return False
+
+    def update_winner(self):
+        self.state['phase'] = 'ended'
+        for player_number in range(1, 4):
+            if player_number not in self.state['lost']:
+                self.state['winner'] = player_number
 
     def update_state(self, new_state):
         if abs(new_state['turn_count'] < self.state['turn_count']):
