@@ -16,13 +16,13 @@ class check_connection(threading.Thread):
         self.timer = timer
         self.start()
     def run(self):
+        print('Connecting...')
         while timer_running:
             time.sleep(1)
-            print('connecting...')
             # During countdown, check if the connection is succesful, if yes, shut down timer
             res = self.server.are_we_connected(self.response['game_id'])
             if res['connected']:
-                print('Connected!')
+                #print('Connected!')
                 self.timer.cancel()
                 break
 
@@ -50,19 +50,19 @@ def connect():
         response = server.want_to_play(my_ip)
         print(response['status'])
         if response['status'] == 'Waiting for players...':
-            print('game_id when waiting', response['game_id'])
+            #print('game_id when waiting', response['game_id'])
             while True: 
                 res = server.is_connecting_started(response['game_id'])
-                print('.')
+                #print('.')
                 if res['connecting_started']:
-                    print('connection started')
+                    #print('Connection started')
                     break
                 time.sleep(1)
-            print('started to establish peer connections')
+            #print('started to establish peer connections')
             timer = threading.Timer(DISCONNECT_TIMEOUT, alarm)
             timer.start()
             timer_running = True
-            print('game_id when checking connection', response['game_id'])
+            #print('game_id when checking connection', response['game_id'])
             connecter = check_connection(response, server, timer)
         elif response['status'] == 'ready to start':
             #This node was the third node in the queue and the game can start
@@ -70,7 +70,7 @@ def connect():
             timer.start()
             timer_running = True
             start_game(response)
-            print('game_id when checking connection', response['game_id'])
+            #print('game_id when checking connection', response['game_id'])
             connecter = check_connection(response, server, timer)
     except:
         print('Error: ', sys.exc_info())
@@ -82,7 +82,7 @@ def alarm():
     global timer_running
     timer_running = False
     print('Failed to connect with peers. Going back to queue, waiting for new players to play with.')
-    print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
+    #print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
     disconnect_from_nodes()
     connect()
 
@@ -94,20 +94,22 @@ def alarm_node3():
     timer_running = False
     print('Failed to connect with peers.')
     disconnect_from_nodes()
-    print('Shutting down node.')
+    print('Shutting down.')
     node.stop()
 
 """
 Disconnect the node from all it's peers
 """
 def disconnect_from_nodes():
-    print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
+    #print('disconnecting with nodes:', node.nodes_outbound, node.nodes_inbound)
     while len(node.nodes_outbound + node.nodes_inbound) > 0:
         for n in (node.nodes_outbound + node.nodes_inbound):
-            print('disconnect with ', n)
+            #print('disconnect with ', n)
             node.disconnect_with_node(n.stop())
         time.sleep(5)
 
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 """
@@ -128,5 +130,6 @@ def start_game(peer_ips):
     node.send_to_nodes(peer_ips)
 
 if __name__ == '__main__':
-    connect()
     node.start()
+    clear()
+    connect()

@@ -27,7 +27,8 @@ class NimGame ():
     def update_state(self, new_state):
         if abs(new_state['turn_count'] < self.state['turn_count']):
             # Don't update from older state
-            print('ERROR! Moves out of syncronization!')
+            do_nothing = 'do nothing'
+            #print('ERROR! Moves out of syncronization!')
         else:
             self.state = new_state
 

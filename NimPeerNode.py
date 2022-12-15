@@ -31,7 +31,7 @@ class NimPeerNode (Node):
     def node_message(self, connected_node, data):
 
         self.my_ip = socket.gethostbyname(socket.gethostname())
-        print("Message from " + connected_node.host + ": " + str(data))
+        #print("Message from " + connected_node.host + ": " + str(data))
 
         if 'status' in data.keys():
 
@@ -78,7 +78,7 @@ class NimPeerNode (Node):
     def status_start_game(self, data):
         # Let's inform the server we are connected to two if so
         if len(super(NimPeerNode, self).all_nodes) >= 2:
-            print('informing server about two peers')
+            #print('informing server about two peers')
             self.we_are_connected(data)
         second_peer_ip = data['2']
         if self.my_ip == second_peer_ip:
@@ -98,7 +98,7 @@ class NimPeerNode (Node):
         
         # Lets send this message so long that server answers to it
         while True:
-            print('Informing server about the succesful connection with 2 peers')
+            #print('Informing server about the succesful connection with 2 peers')
             try:
                 res = server.connected_to_two(data['game_id'], self.my_ip)
                 if res['received']:
@@ -147,36 +147,36 @@ class NimPeerNode (Node):
 
     # MANAGE CONNECTIONS
 
-    def outbound_node_connected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        print("outbound_node_connected: " + connected_node.id)
+    #def outbound_node_connected(self, connected_node):
+        #super(NimPeerNode, self).print_connections()
+        #print("outbound_node_connected: " + connected_node.id)
         
-    def inbound_node_connected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        print("inbound_node_connected: " + connected_node.id)
+    #def inbound_node_connected(self, connected_node):
+    #    super(NimPeerNode, self).print_connections()
+    #    print("inbound_node_connected: " + connected_node.id)
 
-    def inbound_node_disconnected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
+    #def inbound_node_disconnected(self, connected_node):
+    #    super(NimPeerNode, self).print_connections()
         #print("inbound_node_disconnected: " + connected_node.id)
-        connected_nodes = super(NimPeerNode, self).all_nodes
+    #    connected_nodes = super(NimPeerNode, self).all_nodes
         #if connected_node not in connected_nodes:
             #print('trying get connection back')
             #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
 
-    def outbound_node_disconnected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
+    #def outbound_node_disconnected(self, connected_node):
+     #   super(NimPeerNode, self).print_connections()
         #print("outbound_node_disconnected: " + connected_node.id)
-        connected_nodes = super(NimPeerNode, self).all_nodes
+     #   connected_nodes = super(NimPeerNode, self).all_nodes
         #if connected_node not in connected_nodes:
             #print('trying get connection back')
             #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
         
-    def node_disconnect_with_outbound_node(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        print("node wants to disconnect with oher outbound node: " + connected_node.id)
+    #def node_disconnect_with_outbound_node(self, connected_node):
+     #   super(NimPeerNode, self).print_connections()
+      #  print("node wants to disconnect with oher outbound node: " + connected_node.id)
         
-    def node_request_to_stop(self):
-        print("node is requested to stop!")
+    #def node_request_to_stop(self):
+     #   print("node is requested to stop!")
 
     def create_new_connection(self, connection, id, host, port):
         return NodeConnection(self, connection, id, host, port)
