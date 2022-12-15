@@ -18,6 +18,15 @@ class NimGame ():
     def get_current_player(self):
         return self.state['player_in_turn']
 
+    def get_current_state(self):
+        return self.state
+
+    def get_current_turn_count(self):
+        return self.state['turn_count']
+
+    def get_my_number(self):
+        return self.my_number
+
     def set_announcement(self, announcement):
         self.state['announcement'] = announcement
 
