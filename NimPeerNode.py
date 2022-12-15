@@ -47,7 +47,7 @@ class NimPeerNode (Node):
                 self.set_timer()
 
             elif data['status'] == 'move':
-                # Update local game state based on the received message
+                # Update local game state based on the received messagef
                 self.game.update_state(data['state'])
                 # Give some time for the game to update the state
                 time.sleep(1)
@@ -206,7 +206,8 @@ class NimPeerNode (Node):
         # First we add the current player to lost players
         disconnected_player = self.game.get_current_player()
         self.game.add_player_to_lost(disconnected_player)
-
+        # Disconnect from the disconnected node
+        #self.disconnect_from_dead_node(disconnected_player)
         if self.game.is_end(): # Only one player left, so we announce the winner
             # We update our own state
             winner = self.game.update_winner()
@@ -219,3 +220,19 @@ class NimPeerNode (Node):
         super(NimPeerNode, self).send_to_nodes(self.create_message('peer_disconnect', self.game.state))
         #Show the end screen to player
         self.game.display_game_state()
+
+    """
+    When node want's to disconnect with not responding node
+    """
+    def disconnect_from_dead_node(self, disconnected_player):
+        disconnected_ip = self.game.state['players'][disconnected_player-1]
+        print('disconnected ip is', disconnected_ip)
+        print('disconnected player is ', disconnected_player)
+        conn_hosts = []
+        for conn in super(NimPeerNode, self).all_nodes:
+            conn_hosts.append(conn.host)
+            if conn.host == disconnected_ip:
+                while len(super(NimPeerNode, self).all_nodes) > 1:
+                    super(NimPeerNode, self).disconnect_with_node(conn.stop())
+                    time.sleep(5)
+
