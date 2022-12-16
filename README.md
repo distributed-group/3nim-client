@@ -8,14 +8,26 @@ The main objective of this project was to learn how to design and program a simp
 
 The peer-to-peer communication is implemented using library [p2pnetwork](https://github.com/macsnoeren/python-p2p-network). The client-server communication happens through remote procedure calls. For this we used [jsonrpclib](https://pypi.org/project/jsonrpclib/) on the client side and [jsonrpcserver](https://pypi.org/project/jsonrpcserver/) on the server side.
 
+## Requirements
+
+This game is planned to run in Ubuntu operating system. Server and every game client must run on different machines so that everyone has their unique ip-address. To test the game, you will need 4 different machines connected to the same network.
+
+## Download and start the game server
+
+Download the [game server](https://github.com/distributed-group/3nim-server).
+
+Navigate to the folder where server.py is located, and install the dependencies by ```pip freeze < requirements.txt```.
+
+Start the game server by typing ```python3 server.py```
 
 ## Download and start the game
 
-Download the game client. Note that this is only the client side of the game, you need also the game [server](https://github.com/distributed-group/3nim-server).
+Download the game client from this repository.
+
 Navigate to the folder where client.py is located. You need to create a file called ```.env```. File content should be:
 ```SERVER_IP="00.00.00.00"```, where the the ip-address is replacing the zero-string.
 
-Install client dependencies by pip freeze < requirements.txt
+Install client dependencies by ```pip freeze < requirements.txt```
 
 Make sure your game server is running first.
 
