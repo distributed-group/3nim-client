@@ -131,7 +131,7 @@ class NimPeerNode (Node):
 
 
     """
-    What does this function do?
+    Inform the server that this node is succesfully connected to two peer
     """
     def we_are_connected(self, data):
 
@@ -256,7 +256,7 @@ class NimPeerNode (Node):
         self.disconnect_detected = False
         self.game.add_player_to_lost(disconnected_player)
         # Disconnect from the disconnected node
-        #self.disconnect_from_dead_node(disconnected_player)
+        self.disconnect_from_dead_node(disconnected_player)
         if self.game.is_end(): # Only one player left, so we announce the winner
             # We update our own state
             winner = self.game.update_winner()
@@ -270,7 +270,7 @@ class NimPeerNode (Node):
 
 
     """
-    When node want's to disconnect with not responding node
+    When node want's to disconnect with the not responding node
     """
     def disconnect_from_dead_node(self, disconnected_player):
         disconnected_ip = self.game.state['players'][disconnected_player-1]
@@ -302,6 +302,7 @@ class NimPeerNode (Node):
     """
     def set_timer(self):
         if not self.timer.is_alive():
+            self.timer = threading.Timer(TURN_TIMEOUT, self.alarm)
             self.timer.start()
             self.timer_start_time = time.time()
             self.awaited_player = self.game.get_current_player()
