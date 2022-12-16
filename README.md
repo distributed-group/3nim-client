@@ -10,7 +10,9 @@ The peer-to-peer communication is implemented using library [p2pnetwork](https:/
 
 ## Requirements
 
-This game is planned to run in Ubuntu operating system. Server and every game client must run on different machines so that everyone has their unique ip-address. To test the game, you will need 4 different machines connected to the same network.
+This game is planned to run in Ubuntu operating system. You need also Python and pip installed. 
+
+Server and every game client must run on different machines so that everyone has their unique ip-address. To test the game, you will need 4 different machines connected to the same network.
 
 ## Download and start the game server
 
