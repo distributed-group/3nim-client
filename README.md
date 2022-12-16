@@ -12,7 +12,8 @@ The peer-to-peer communication is implemented using library [p2pnetwork](https:/
 ## Download and start the game
 
 Download the game client. Note that this is only the client side of the game, you need also the game [server](https://github.com/distributed-group/3nim-server).
-Navigate to the folder where client.py is located.
+Navigate to the folder where client.py is located. You need to create a file called ```.env```. File content should be:
+```SERVER_IP=00.00.00.00```, where the the ip-address is replacing the zero-string.
 
 Install client dependencies by pip freeze < requirements.txt
 
