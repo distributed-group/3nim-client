@@ -16,7 +16,7 @@ load_dotenv()
 
 p2p_port = 10001
 server_port = 5001
-TURN_TIMEOUT = 20.0
+TURN_TIMEOUT = 30.0
 
 
 # Different statuses
@@ -71,13 +71,15 @@ class NimPeerNode (Node):
                 
                 self.stop_old_timer()
                 self.status_start_game(data)
-                self.set_timer()
+                self.set_new_timer()
 
             elif data['status'] == MOVE:
 
                 self.stop_old_timer()
-                self.status_move(data)
-                self.set_timer()
+                if self.status_move(data) == 1:
+                    self.set_new_timer()
+                else:
+                    self.shut_down()
 
             elif data['status'] == DISCONNECT:
 
@@ -87,7 +89,7 @@ class NimPeerNode (Node):
             elif data['status'] == ACK_DISCONNECT:
 
                 # We have reached an agreement, proceed to remove the disconnected peer
-                self.remove_peer(data['state'])
+                self.remove_peer_and_end_game(data['state'])
 
             elif data['status'] == REJ_DISCONNECT:
 
@@ -168,15 +170,20 @@ class NimPeerNode (Node):
         1. We show the current state
         2. Make a move (updating our local state again)
         3. Broadcast the new state to others
-    TODO: The user has x seconds to make a move. Countdown is displayed to the user.
+    Returns 0 if the game has ended and 1 otherwise.
     """
     def action(self, data):
         self.game.display_game_state()
+        if 'state' in data and data['state']['phase'] == 'ended':
+            return 0
         if self.game.our_turn():
             updated_state = self.game.make_move()
             data['status'] = MOVE
             data['state'] = updated_state
             super(NimPeerNode, self).send_to_nodes(data)
+            if updated_state['phase'] == 'ended':
+                return 0
+        return 1
         
 
     """
@@ -190,11 +197,8 @@ class NimPeerNode (Node):
         # Update local game state based on the received message
         self.game.update_state(data['state'])
 
-        # Give some time for the game to update the state. Is this needed?
-        time.sleep(1)
-
         # Decide what to do
-        self.action(data)
+        return self.action(data)
         
 
     """
@@ -208,11 +212,11 @@ class NimPeerNode (Node):
             # We have also detected this disconnect and acknowledge the alert
             super(NimPeerNode, self).send_to_nodes(self.create_message(ACK_DISCONNECT, False, disconnected_player))
             # Since we are in an agreement, proceed to remove the disconnected peer
-            self.remove_peer(disconnected_player)
+            self.remove_peer_and_end_game(disconnected_player)
 
         elif self.timer.is_alive() and self.awaited_player == disconnected_player:
             # We are still waiting for an answer from the player
-            time_remaining = 20 - (time.time() - self.timer_start_time)
+            time_remaining = TURN_TIMEOUT - (time.time() - self.timer_start_time)
             print("Time remaining in our alarm:",time_remaining)
             self.pending_disconnect_alert = True
 
@@ -231,8 +235,10 @@ class NimPeerNode (Node):
         current_state = data['state']
         if (self.game.get_current_turn_count()) < current_state['turn_count']:
             self.game.update_state(current_state)
-            self.action(data)
-            self.set_timer()
+            if self.action(data) == 1:
+                self.set_new_timer()
+            else:
+                self.shut_down()
 
 
     """
@@ -252,7 +258,7 @@ class NimPeerNode (Node):
     """
     TODO
     """
-    def remove_peer(self, disconnected_player):
+    def remove_peer_and_end_game(self, disconnected_player):
         self.disconnect_detected = False
         self.game.add_player_to_lost(disconnected_player)
         # Disconnect from the disconnected node
@@ -267,6 +273,12 @@ class NimPeerNode (Node):
             self.game.set_announcement(printer.disconnect(disconnected_player))
         #Show the end screen to player
         self.game.display_game_state()
+        self.shut_down()
+
+
+    def shut_down(self):
+        print("Stop node and shut down program...")
+        super(NimPeerNode, self).stop()
 
 
     """
@@ -288,19 +300,19 @@ class NimPeerNode (Node):
     # TIMER RELATED FUNCTIONS
 
     """
-    Deletes the previous timer. Creates a new timer.
+    Stops and deletes the previous timer.
+    Replaces it with another timer.
     """
     def stop_old_timer(self):
         if self.timer.is_alive():
             self.timer.cancel()
-            ("Timer stopped.")
             self.timer = threading.Timer(TURN_TIMEOUT, self.alarm)
 
 
     """
-    Sets the timer.
+    Creates and starts a new timer.
     """
-    def set_timer(self):
+    def set_new_timer(self):
         if not self.timer.is_alive():
             self.timer = threading.Timer(TURN_TIMEOUT, self.alarm)
             self.timer.start()
@@ -315,13 +327,16 @@ class NimPeerNode (Node):
         #First we check if we have a pending disconnect alert
         if self.pending_disconnect_alert == True:
             super(NimPeerNode, self).send_to_nodes(self.create_message(ACK_DISCONNECT, False, self.awaited_player))
-            self.remove_peer(self.awaited_player)
+            self.remove_peer_and_end_game(self.awaited_player)
         # First we raise the disconnect flag
         self.disconnect_detected = True
         self.disconnected_peer = self.awaited_player
         # Then we check if the other node agrees about the disconnection
-        print("WERE ARE ABOUT TO SEND A DISCONNECT MESSAGE")
         super(NimPeerNode, self).send_to_nodes(self.create_message(DISCONNECT, False, self.awaited_player))
+
+
+
+
 
 
     # MANAGE CONNECTIONS

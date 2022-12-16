@@ -61,7 +61,7 @@ class NimGame ():
 
         if self.is_end(): # Check if the game has ended
             self.update_winner()
-            printer.print_results(self.state['announcement'], self.state['winner'])
+            self.display_game_state()
             return self.state
             
         self.increment_turn_count()

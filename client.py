@@ -7,6 +7,7 @@ from NimPeerNode import NimPeerNode
 from dotenv import load_dotenv
 import threading
 
+
 class check_connection(threading.Thread):
     def __init__(self, response, server, timer):
         threading.Thread.__init__(self)
@@ -26,6 +27,7 @@ class check_connection(threading.Thread):
                 self.timer.cancel()
                 break
 
+
 load_dotenv()
 
 DISCONNECT_TIMEOUT = 10.0
@@ -35,6 +37,7 @@ server_port = 5001
 node = NimPeerNode(my_ip, p2p_port)
 connecter = None
 timer_running = False
+
 
 """ 
 Connects this client to the server.
@@ -75,6 +78,7 @@ def connect():
     except:
         print('Error: ', sys.exc_info())
 
+
 """
 This is calld when timer runs out of time
 """
@@ -86,6 +90,7 @@ def alarm():
     disconnect_from_nodes()
     connect()
 
+
 """
 This is calld when third nodes timer runs out of time
 """
@@ -96,6 +101,7 @@ def alarm_node3():
     disconnect_from_nodes()
     print('Shutting down node.')
     node.stop()
+
 
 """
 Disconnect the node from all it's peers
@@ -126,6 +132,7 @@ def start_game(peer_ips):
     #Shares the IP addresses to nodes 1 and 2 so they can reach each other
     peer_ips['status'] = 'connecting'
     node.send_to_nodes(peer_ips)
+
 
 if __name__ == '__main__':
     connect()
