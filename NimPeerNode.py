@@ -184,7 +184,7 @@ class NimPeerNode (Node):
 
         elif self.timer.is_alive() and not self.awaited_player == disconnected_player:
             # We have already received a message from the peer that has been reported disconnected. We reject the disconnect alert.
-            super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, REJ_DISCONNECT, False, self.game.get_current_state))
+            super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, REJ_DISCONNECT, False, self.game.get_game_state))
 
 
     """
@@ -199,7 +199,7 @@ class NimPeerNode (Node):
         # We receive the updated game state from the peer that rejected our disconnect message.
         updated_state = data['state']
         # If this is new information to us, update the local game state
-        if self.game.get_current_turn_count() < updated_state['turn_count']:
+        if self.game.get_turn_count() < updated_state['turn_count']:
             self.game.update_state(updated_state)
             return self.action(data)
 
@@ -240,7 +240,7 @@ class NimPeerNode (Node):
         self.disconnect_from_peer(disconnected_player)
         if self.game.is_end(): # Only one player left, so we announce the winner
             # We update our own state
-            winner = self.game.update_winner()
+            winner = self.game.find_winner()
             self.game.set_announcement(printer.disconnect_and_winner(disconnected_player, winner))
         else: # The game ends with no winner
             # We update our own state
@@ -272,7 +272,7 @@ class NimPeerNode (Node):
             self.timer = threading.Timer(TURN_TIMEOUT, self.alarm)
             self.timer.start()
             self.timer_start_time = time.time()
-            self.awaited_player = self.game.get_current_player()
+            self.awaited_player = self.game.get_player_in_turn()
 
 
     """

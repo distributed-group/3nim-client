@@ -2,6 +2,10 @@ import os
 import terminedia as pr
 import pyfiglet as fig
 
+"""
+This library contains the code for printing UI text to the terminal window.
+"""
+
 def print_title(player_number):
     clear()
     pr.print(fig.figlet_format('3 N I M', font='5lineoblique'), color='yellow')
@@ -68,7 +72,7 @@ def disconnect_and_winner(disconnected_player, winner):
     return "Player " + str(disconnected_player) + " has disconnected and player " + str(winner) + " has won!"
 
 def disconnect(disconnected_player):
-    return "Player " + str(disconnected_player) + " has left the game.\nThe game has ended."
+    return "Player " + str(disconnected_player) + " has left the game.\nThe game has ended with no winner."
 
 
 # Helper functions
