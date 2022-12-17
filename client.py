@@ -7,6 +7,7 @@ from Logger import Logger
 from jsonrpclib import Server
 from NimPeerNode import NimPeerNode
 from dotenv import load_dotenv
+import printer
 
 
 load_dotenv()
@@ -137,15 +138,8 @@ def start_game(peer_ips):
     logger.write_log('Connecting message and IPs sent to nodes 1 and 2')
 
 
-"""
-Clears the terminal.
-"""
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
 if __name__ == '__main__':
-    clear()
+    printer.clear()
     connect()
     node.start()
     

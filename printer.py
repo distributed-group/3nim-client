@@ -29,14 +29,14 @@ def print_results(announcement, winner):
     print(announcement + '\n')
     pr.print('_______PLAYER ' + str(winner) + ' WINS!_________', color='green')
     pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
-    pr.print('press ctrl + c to quit', color='white')
+    pr.print('', color='white')
 
 def print_results_no_winner(announcement):
     pr.print('', color='white')
     print(announcement + '\n')
     pr.print('_______PLEASE QUEUE AGAIN!_________', color='green')
     pr.print(fig.figlet_format('END', font='5lineoblique'), color='yellow')
-    pr.print('press ctrl + c to quit', color='white')
+    pr.print('', color='white')
 
 def ask_for_move():
     pr.print('', color='yellow')
@@ -51,6 +51,9 @@ def ask_again():
     answer = input()
     return answer
 
+"""
+Clears the terminal.
+"""
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
