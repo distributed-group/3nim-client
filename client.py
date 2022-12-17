@@ -9,28 +9,6 @@ from NimPeerNode import NimPeerNode
 from dotenv import load_dotenv
 
 
-class check_connection(threading.Thread):
-    def __init__(self, game_id, server, timer, logger):
-        threading.Thread.__init__(self)
-        self.daemon = True
-        self.game_id = game_id
-        self.server = server
-        self.timer = timer
-        self.logger = logger
-        self.start()
-    def run(self):
-        print('Connecting...')
-        logger.write_log('Connecting to peers...')
-        while timer_running:
-            time.sleep(1)
-            # During countdown, check if the connection is succesful, if yes, shut down timer
-            res = self.server.are_we_connected(self.game_id)
-            if res['connected']:
-                logger.write_log('Connected!')
-                self.timer.cancel()
-                break
-
-
 load_dotenv()
 
 DISCONNECT_TIMEOUT = 10.0
@@ -67,20 +45,41 @@ def connect():
             timer = threading.Timer(DISCONNECT_TIMEOUT, alarm)
             timer.start()
         elif response['status'] == 'ready to start':
-            #This node was the third node in the queue and the game can start
+            # This node was the third node in the queue and the game can start
+            # Third node has own timer alarm
             timer = threading.Timer(DISCONNECT_TIMEOUT, alarm_node3)
             timer.start()
             start_game(response)
+        # Check constantly from the server if the peer connections are established within the time limit of the timer
         timer_running = True
         logger.write_log('game_id when checking connection ' + str(response['game_id']))
-        check_connection(response['game_id'], server, timer, logger)
+        connecter = threading.Thread(target=check_connection, args=(response['game_id'], server, timer, logger), daemon=True)
+        connecter.start()
     except:
         print('Error: ', sys.exc_info())
         logger.write_log('Error: '+ str(sys.exc_info()))
 
+"""
+Polling the server and asking if peer connections are established succesfully.
+Uses timer's time limit. This function stops if time limit is reached.
+"""
+def check_connection(game_id, server, timer, logger):
+    global timer_running
+    print('Connecting...')
+    logger.write_log('Connecting to peers...')
+    while timer_running:
+        time.sleep(1)
+        # During countdown, check if the connection is succesful, if yes, shut down timer
+        res = server.are_we_connected(game_id)
+        if res['connected']:
+            logger.write_log('Connected!')
+            timer.cancel()
+            break
+
 
 """
-This is calld when timer runs out of time
+This is calld when timer runs out of time.
+Node breaks the peer connections, if any, and goes back to the server's queue.
 """
 def alarm():
     global timer_running
@@ -92,7 +91,8 @@ def alarm():
 
 
 """
-This is calld when third nodes timer runs out of time
+This is calld when third nodes timer runs out of time.
+Node breaks connections to peers, if any, and shuts down.
 """
 def alarm_node3():
     global timer_running
