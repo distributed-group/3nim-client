@@ -4,7 +4,7 @@ import pyfiglet as fig
 
 def print_title(player_number):
     clear()
-    pr.print(fig.figlet_format('N I M Game', font='5lineoblique'), color='yellow')
+    pr.print(fig.figlet_format('3 N I M', font='5lineoblique'), color='yellow')
     print('You are player ' + str(player_number) + '.')
 
 def print_gamestate(announcement, player_in_turn, my_number, gamequeue):
@@ -69,3 +69,4 @@ def disconnect_and_winner(disconnected_player, winner):
 
 def disconnect(disconnected_player):
     return "Player " + str(disconnected_player) + " has left the game.\nThe game has ended."
+    
