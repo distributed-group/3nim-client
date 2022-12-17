@@ -3,6 +3,7 @@ from p2pnetwork.nodeconnection import NodeConnection
 from dotenv import load_dotenv
 from NimGame import NimGame
 from jsonrpclib import Server
+from Logger import Logger
 import time
 import sys
 import os
@@ -50,6 +51,9 @@ class NimPeerNode (Node):
         self.pending_disconnect_alert = False
         super(NimPeerNode, self).__init__(host, port, id, callback, max_connections)
 
+        # Log the events
+        self.logger = Logger('log.txt', host)
+
 
     """
     This function is invoked when another node sends this node a message.
@@ -59,7 +63,7 @@ class NimPeerNode (Node):
     def node_message(self, connected_node, data):
 
         self.my_ip = socket.gethostbyname(socket.gethostname())
-        print("Message from " + connected_node.host + ": " + str(data))
+        self.logger.write_log('Message from ' + connected_node.host + ': ' + str(data))
 
         if 'status' in data.keys():
 
@@ -116,7 +120,7 @@ class NimPeerNode (Node):
 
         # Let's inform the server we are connected to two peers if so
         if len(super(NimPeerNode, self).all_nodes) >= 2:
-            print('informing server about two peers')
+            self.logger.write_log('informing server about two peers')
             self.we_are_connected(data)
 
         second_peer_ip = data['2']
@@ -143,13 +147,13 @@ class NimPeerNode (Node):
         
         # Let's send this message until the server answers it
         while True:
-            print('Informing server about the succesful connection with 2 peers')
+            self.logger.write_log('Informing server about the succesful connection with 2 peers')
             try:
                 res = server.connected_to_two(data['game_id'], self.my_ip)
                 if res['received']:
                     break
             except:
-                print('Error: ', sys.exc_info())
+                self.logger.write_log('Error: ' + str(sys.exc_info()))
             time.sleep(2)
 
 
@@ -217,7 +221,7 @@ class NimPeerNode (Node):
         elif self.timer.is_alive() and self.awaited_player == disconnected_player:
             # We are still waiting for an answer from the player
             time_remaining = TURN_TIMEOUT - (time.time() - self.timer_start_time)
-            print("Time remaining in our alarm:",time_remaining)
+            self.logger.write_log('Time remaining in our alarm: ' + str(time_remaining))
             self.pending_disconnect_alert = True
 
         elif self.timer.is_alive() and not self.awaited_player == disconnected_player:
@@ -229,7 +233,7 @@ class NimPeerNode (Node):
     TODO
     """
     def status_reject_disconnect(self, data):
-        print("Disconnect was rejected.")
+        self.logger.write_log('Disconnect was rejected.')
         self.disconnect_detected = False
         self.disconnected_peer = 0
         current_state = data['state']
@@ -277,7 +281,8 @@ class NimPeerNode (Node):
 
 
     def shut_down(self):
-        print("Stop node and shut down program...")
+        self.logger.write_log('Stop node and shut down program...')
+        print('Shutting down...')
         super(NimPeerNode, self).stop()
 
 
@@ -286,8 +291,8 @@ class NimPeerNode (Node):
     """
     def disconnect_from_dead_node(self, disconnected_player):
         disconnected_ip = self.game.state['players'][disconnected_player-1]
-        print('disconnected ip is', disconnected_ip)
-        print('disconnected player is ', disconnected_player)
+        self.logger.write_log('disconnected ip is' + str(disconnected_ip))
+        self.logger.write_log('disconnected player is ' + str(disconnected_player))
         conn_hosts = []
         for conn in super(NimPeerNode, self).all_nodes:
             conn_hosts.append(conn.host)
@@ -339,38 +344,22 @@ class NimPeerNode (Node):
 
 
 
-    # MANAGE CONNECTIONS
+    # LOG THE CONNECTION ACTIVITY
 
     def outbound_node_connected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        print("outbound_node_connected: " + connected_node.id)
+        self.logger.write_log('outbound_node_connected: ' + str(connected_node.id))
         
     def inbound_node_connected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        print("inbound_node_connected: " + connected_node.id)
+        self.logger.write_log('inbound_node_connected: ' + str(connected_node.id))
 
     def inbound_node_disconnected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        #print("inbound_node_disconnected: " + connected_node.id)
-        connected_nodes = super(NimPeerNode, self).all_nodes
-        #if connected_node not in connected_nodes:
-            #print('trying get connection back')
-            #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
+        self.logger.write_log('inbound_node_disconnected: ' + str(connected_node.id))
 
     def outbound_node_disconnected(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        #print("outbound_node_disconnected: " + connected_node.id)
-        connected_nodes = super(NimPeerNode, self).all_nodes
-        #if connected_node not in connected_nodes:
-            #print('trying get connection back')
-            #super(NimPeerNode, self).connect_with_node(connected_node.host, p2p_port)
+        self.logger.write_log('outbound_node_disconnected: ' + str(connected_node.id))
         
     def node_disconnect_with_outbound_node(self, connected_node):
-        super(NimPeerNode, self).print_connections()
-        print("node wants to disconnect with oher outbound node: " + connected_node.id)
+        self.logger.write_log('node wants to disconnect with oher outbound node: ' + str(connected_node.id))
         
     def node_request_to_stop(self):
-        print("node is requested to stop!")
-
-    def create_new_connection(self, connection, id, host, port):
-        return NodeConnection(self, connection, id, host, port)
+        self.logger.write_log('node is requested to stop!')

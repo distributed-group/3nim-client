@@ -3,7 +3,7 @@ import terminedia as pr
 import pyfiglet as fig
 
 def print_title(player_number):
-    #clear()
+    clear()
     pr.print(fig.figlet_format('N I M Game', font='5lineoblique'), color='yellow')
     print('You are player ' + str(player_number) + '.')
 

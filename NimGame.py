@@ -1,7 +1,9 @@
 import time
 import printer
+from Logger import Logger
 
-class NimGame ():
+
+class NimGame:
 
     def __init__(self, my_ip, player_number, player1_ip, player2_ip, player3_ip):
         self.my_ip = my_ip
@@ -14,6 +16,9 @@ class NimGame ():
                       'winner': None,
                       'lost': [],
                       'turn_count': 0}
+
+        # Log the events
+        self.logger = Logger('log.txt', my_ip)
 
     def get_current_player(self):
         return self.state['player_in_turn']
@@ -36,7 +41,7 @@ class NimGame ():
     def update_state(self, new_state):
         if abs(new_state['turn_count'] < self.state['turn_count']):
             # Don't update from older state
-            print('ERROR! Moves out of syncronization!')
+            self.logger.write_log('ERROR! Moves out of syncronization!')
         else:
             self.state = new_state
 
