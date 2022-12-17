@@ -10,10 +10,10 @@ from dotenv import load_dotenv
 
 
 class check_connection(threading.Thread):
-    def __init__(self, response, server, timer, logger):
+    def __init__(self, game_id, server, timer, logger):
         threading.Thread.__init__(self)
         self.daemon = True
-        self.response = response
+        self.game_id = game_id
         self.server = server
         self.timer = timer
         self.logger = logger
@@ -24,7 +24,7 @@ class check_connection(threading.Thread):
         while timer_running:
             time.sleep(1)
             # During countdown, check if the connection is succesful, if yes, shut down timer
-            res = self.server.are_we_connected(self.response['game_id'])
+            res = self.server.are_we_connected(self.game_id)
             if res['connected']:
                 logger.write_log('Connected!')
                 self.timer.cancel()
@@ -38,7 +38,6 @@ my_ip = socket.gethostbyname(socket.gethostname())
 p2p_port = 10001
 server_port = 5001
 node = NimPeerNode(my_ip, p2p_port)
-connecter = None
 timer_running = False
 logger = Logger('log.txt', my_ip)
 
@@ -49,7 +48,7 @@ When the client receives 'ready to start' -message, it connects with two peers.
 Peer IP addresses are in the response message.
 """
 def connect():
-    global connecter, timer_running
+    global timer_running
     #Connect to json-rpc server
     server_ip = os.getenv("SERVER_IP")
     server = Server('http://' + server_ip + ':' + str(server_port))
@@ -74,7 +73,7 @@ def connect():
             start_game(response)
         timer_running = True
         logger.write_log('game_id when checking connection ' + str(response['game_id']))
-        connecter = check_connection(response, server, timer, logger)
+        check_connection(response['game_id'], server, timer, logger)
     except:
         print('Error: ', sys.exc_info())
         logger.write_log('Error: '+ str(sys.exc_info()))
