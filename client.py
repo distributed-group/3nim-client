@@ -22,12 +22,12 @@ logger = Logger('log.txt', my_ip)
 
 """ 
 Connects this client to the server.
-When the client receives 'ready to start' -message, it connects with two peers. 
+When the client receives 'ready to start' -message, it starts connecting with peers. 
 Peer IP addresses are in the response message.
 """
 def connect():
     global timer_running
-    #Connect to json-rpc server
+    # Connect to json-rpc server
     server_ip = os.getenv("SERVER_IP")
     server = Server('http://' + server_ip + ':' + str(server_port))
     try:
@@ -35,7 +35,7 @@ def connect():
         print(response['status'])
         if response['status'] == 'Waiting for players...':
             logger.write_log('game_id when waiting ' + str(response['game_id']))
-            while True: 
+            while True:
                 res = server.is_connecting_started(response['game_id'])
                 if res['connecting_started']:
                     logger.write_log('connecting started')
@@ -46,7 +46,7 @@ def connect():
             timer.start()
         elif response['status'] == 'ready to start':
             # This node was the third node in the queue and the game can start
-            # Third node has own timer alarm
+            # Third node has its own timer alarm
             timer = threading.Timer(DISCONNECT_TIMEOUT, alarm_node3)
             timer.start()
             start_game(response)
@@ -59,6 +59,7 @@ def connect():
         print('Error: ', sys.exc_info())
         logger.write_log('Error: '+ str(sys.exc_info()))
 
+
 """
 Polling the server and asking if peer connections are established succesfully.
 Uses timer's time limit. This function stops if time limit is reached.
@@ -69,7 +70,7 @@ def check_connection(game_id, server, timer, logger):
     logger.write_log('Connecting to peers...')
     while timer_running:
         time.sleep(1)
-        # During countdown, check if the connection is succesful, if yes, shut down timer
+        # During countdown, check if the connection is succesful. If yes, shut down the timer.
         res = server.are_we_connected(game_id)
         if res['connected']:
             logger.write_log('Connected!')
@@ -78,7 +79,7 @@ def check_connection(game_id, server, timer, logger):
 
 
 """
-This is calld when timer runs out of time.
+This is called when the timer runs out of time.
 Node breaks the peer connections, if any, and goes back to the server's queue.
 """
 def alarm():
@@ -91,7 +92,7 @@ def alarm():
 
 
 """
-This is calld when third nodes timer runs out of time.
+This is called when third node's timer runs out of time.
 Node breaks connections to peers, if any, and shuts down.
 """
 def alarm_node3():
@@ -106,7 +107,7 @@ def alarm_node3():
 
 
 """
-Disconnect the node from all it's peers
+Disconnects the node from all it's peers.
 """
 def disconnect_from_nodes():
     logger.write_log('Disconnecting with nodes ' + str(node.all_nodes))
@@ -116,27 +117,28 @@ def disconnect_from_nodes():
         time.sleep(5)
 
 
-
 """
-Connects this client to the peers.
+Connects this node to the peers.
 This code is executed by node 3.
 """
 def start_game(peer_ips):
+
     first_peer_ip = peer_ips['1']
     second_peer_ip = peer_ips['2']
 
-    #Connect with the other two nodes, 1 and 2
+    # Connect with the other two nodes, 1 and 2
     node.connect_with_node(first_peer_ip, p2p_port)
     node.connect_with_node(second_peer_ip, p2p_port)
     time.sleep(2)
 
-    #Shares the IP addresses to nodes 1 and 2 so they can reach each other
+    # Share the IP addresses to nodes 1 and 2 so they can reach each other
     peer_ips['status'] = 'connecting'
     node.send_to_nodes(peer_ips)
     logger.write_log('Connecting message and IPs sent to nodes 1 and 2')
 
+
 """
-Clear the screen
+Clears the terminal.
 """
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
