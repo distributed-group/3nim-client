@@ -141,7 +141,7 @@ class NimPeerNode (Node):
 
         # Create the local game state
         if not self.game:
-            my_number = self.get_player_number(data)
+            my_number = printer.get_player_number(data, self.my_ip)
             self.game = NimGame(self.my_ip, my_number, data['1'], data['2'], data['3'])
             # Decide on an action
             self.action(data)
@@ -155,7 +155,7 @@ class NimPeerNode (Node):
     def status_move(self, data):
         # Let's check if we have a pending disconnect alert and reject it
         if self.pending_disconnect_alert == True:
-            super(NimPeerNode, self).send_to_nodes(self.create_message(REJ_DISCONNECT, False, data['state']))
+            super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, REJ_DISCONNECT, False, data['state']))
 
         # Update local game state based on the received message and decide what to do (make move or not)
         self.game.update_state(data['state'])
@@ -172,7 +172,7 @@ class NimPeerNode (Node):
 
         if self.disconnect_detected == True and self.disconnected_peer == disconnected_player:
             # We have also detected this disconnect and acknowledge the alert
-            super(NimPeerNode, self).send_to_nodes(self.create_message(ACK_DISCONNECT, False, disconnected_player))
+            super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, ACK_DISCONNECT, False, disconnected_player))
             # Since we are in an agreement, proceed to remove the disconnected peer and end the game
             self.remove_peer_and_end_game(disconnected_player)
 
@@ -184,7 +184,7 @@ class NimPeerNode (Node):
 
         elif self.timer.is_alive() and not self.awaited_player == disconnected_player:
             # We have already received a message from the peer that has been reported disconnected. We reject the disconnect alert.
-            super(NimPeerNode, self).send_to_nodes(self.create_message(REJ_DISCONNECT, False, self.game.get_current_state))
+            super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, REJ_DISCONNECT, False, self.game.get_current_state))
 
 
     """
@@ -227,34 +227,28 @@ class NimPeerNode (Node):
         return 1
 
 
-
-    # HELPER FUNCTIONS
-
-
     """
-    Finds this node's player number from the 'start game' -message.
+    Moves the disconnected peer to lost players and ends the game. After that shuts this node down.
+    If another player has already lost, we announce the remaining player as the winner.
+    Otherwise the game ends with no winner.
     """
-    def get_player_number(self, data):
-        for number in data:
-            if (data[number] == self.my_ip):
-                return number
-        return 0
-
-
-    """
-    Creates a new message.
-    Status is given as a parameter. If players is set to True, player IP's will be included in the message. 
-    Game state can be given as a parameter, otherwise it will be an empty dictionary.
-    """
-    def create_message(self, status, players = True, state = {}):
-        data = {}
-        if players:
-            data['1'] = self.game.state['players'][0]
-            data['2'] = self.game.state['players'][1]
-            data['3'] = self.game.state['players'][2]
-        data['status'] = status
-        data['state'] = state
-        return data
+    def remove_peer_and_end_game(self, disconnected_player):
+        self.disconnect_detected = False
+        # Add disconnected node to lost players
+        self.game.add_player_to_lost(disconnected_player)
+        # Disconnect from the disconnected node
+        self.disconnect_from_peer(disconnected_player)
+        if self.game.is_end(): # Only one player left, so we announce the winner
+            # We update our own state
+            winner = self.game.update_winner()
+            self.game.set_announcement(printer.disconnect_and_winner(disconnected_player, winner))
+        else: # The game ends with no winner
+            # We update our own state
+            self.game.set_phase('ended_no_winner')
+            self.game.set_announcement(printer.disconnect(disconnected_player))
+        #Show the end screen to player
+        self.game.display_game_state()
+        self.shut_down()
 
 
 
@@ -287,13 +281,13 @@ class NimPeerNode (Node):
     def alarm(self):
         #First we check if we have a pending disconnect alert
         if self.pending_disconnect_alert == True:
-            super(NimPeerNode, self).send_to_nodes(self.create_message(ACK_DISCONNECT, False, self.awaited_player))
+            super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, ACK_DISCONNECT, False, self.awaited_player))
             self.remove_peer_and_end_game(self.awaited_player)
         # Then we raise the disconnect flag
         self.disconnect_detected = True
         self.disconnected_peer = self.awaited_player
         # Then we check if the remaining node agrees about the disconnection
-        super(NimPeerNode, self).send_to_nodes(self.create_message(DISCONNECT, False, self.awaited_player))
+        super(NimPeerNode, self).send_to_nodes(printer.create_message(self.game, DISCONNECT, False, self.awaited_player))
 
 
 
@@ -322,30 +316,6 @@ class NimPeerNode (Node):
 
 
     """
-    Moves the disconnected peer to lost players and ends the game. After that shuts this node down.
-    If another player has already lost, we announce the remaining player as the winner.
-    Otherwise the game ends with no winner.
-    """
-    def remove_peer_and_end_game(self, disconnected_player):
-        self.disconnect_detected = False
-        # Add disconnected node to lost players
-        self.game.add_player_to_lost(disconnected_player)
-        # Disconnect from the disconnected node
-        self.disconnect_from_peer(disconnected_player)
-        if self.game.is_end(): # Only one player left, so we announce the winner
-            # We update our own state
-            winner = self.game.update_winner()
-            self.game.set_announcement(printer.disconnect_and_winner(disconnected_player, winner))
-        else: # The game ends with no winner
-            # We update our own state
-            self.game.set_phase('ended_no_winner')
-            self.game.set_announcement(printer.disconnect(disconnected_player))
-        #Show the end screen to player
-        self.game.display_game_state()
-        self.shut_down()
-
-
-    """
     Disconnects this node from a peer. Peer player number is given as a parameter.
     """
     def disconnect_from_peer(self, disconnected_player):
@@ -370,8 +340,7 @@ class NimPeerNode (Node):
         super(NimPeerNode, self).stop()
 
 
-
-    # LOG THE CONNECTION ACTIVITY
+    # Log other connection activity...
 
 
     def outbound_node_connected(self, connected_node):

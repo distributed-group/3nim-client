@@ -50,9 +50,9 @@ def ask_again():
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-"""
-Here are ready-made strings to be used as announcements.
-"""
+
+# Ready-made strings to be used as announcements.
+
 def starting():
     return 'Welcome to the game.'
 
@@ -69,4 +69,31 @@ def disconnect_and_winner(disconnected_player, winner):
 
 def disconnect(disconnected_player):
     return "Player " + str(disconnected_player) + " has left the game.\nThe game has ended."
-    
+
+
+# Helper functions
+
+"""
+Creates a new message.
+Status is given as a parameter. If players is set to True, player IP's will be included in the message. 
+Game state can be given as a parameter, otherwise it will be an empty dictionary.
+"""
+def create_message(game, status, players = True, state = {}):
+    data = {}
+    if players:
+        data['1'] = game.state['players'][0]
+        data['2'] = game.state['players'][1]
+        data['3'] = game.state['players'][2]
+    data['status'] = status
+    data['state'] = state
+    return data
+
+
+"""
+Finds a given node's player number from the 'start game' -message based on the node's IP.
+"""
+def get_player_number(data, node_ip):
+    for number in data:
+        if (data[number] == node_ip):
+            return number
+    return 0
