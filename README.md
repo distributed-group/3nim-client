@@ -44,7 +44,7 @@ When it is your turn, you need to decide if you want to pick 1 or 2 items. If yo
 
 ## Program construction
 
-```client.py``` is handling the initial contact to the game server and starting the actual client node.
+```client.py``` handles the initial contact to the game server and starts the actual client node.
 
 ```NimPeerNode``` has functionalities to react to the messages which the client node receives.
 
