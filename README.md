@@ -42,8 +42,12 @@ You are first placed to the player queue in the server side. When there are thre
 You will see the fresh game state always in the bottom of the screen. There are blue sticks and red rotten apples.
 When it is your turn, you need to decide if you want to pick 1 or 2 items. If you pick a rotten apple, you lose. The last player in the game, who has not picked the rotten apple, is the winner.
 
-## Documentation
+## Program construction
 
-Detailed description of the system can be found here.
-- Link to the final report?
-- ...Something else?
+```client.py``` is handling the initial contact to the game server.
+
+```NimPeerNode``` has functionalities to react to the messages which the client node receives.
+
+```NimGame``` contains the game logic.
+
+```printer.py``` does printings to the terminal and has some helper functions
