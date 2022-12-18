@@ -51,3 +51,5 @@ When it is your turn, you need to decide if you want to pick 1 or 2 items. If yo
 ```NimGame``` contains the game logic.
 
 ```printer.py``` does printings to the terminal and has some helper functions
+
+```Logger``` writes to the log file.
