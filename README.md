@@ -18,7 +18,7 @@ Server and every game client must run on different machines so that everyone has
 
 Download the [game server](https://github.com/distributed-group/3nim-server).
 
-Navigate to the folder where server.py is located, and install the dependencies by ```pip freeze < requirements.txt```.
+Navigate to the folder where server.py is located, and install the dependencies by ```pip install -r requirements.txt```.
 
 Start the game server by typing ```python3 server.py```
 
@@ -29,7 +29,7 @@ Download the game client from this repository.
 Navigate to the folder where client.py is located. You need to create a file called ```.env```. File content should be:
 ```SERVER_IP="00.00.00.00"```, where the the ip-address is replacing the zero-string.
 
-Install client dependencies by ```pip freeze < requirements.txt```
+Install client dependencies by ```pip install -r requirements.txt```
 
 Make sure your game server is running first.
 
